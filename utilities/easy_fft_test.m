@@ -7,3 +7,4 @@ f2=4e3;
 y=cos(2*pi*f1*t)+sin(2*pi*f2*t);
 
 easy_fft(y,fs);
+    

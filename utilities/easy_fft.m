@@ -8,9 +8,9 @@ f=fs/2*linspace(0,1,nrOfPoints/2+1);
 %plot
 figure('units','normalized','outerposition',[0 0 1 1]);
 subplot(2,1,1)
-plot(in_data)
+plot(1/fs*(1:length(in_data)),in_data)
 title('time domain','FontSize',12)
-xlabel('samples(n)')
+xlabel('time[s]]')
 ylabel('y(t)')
 subplot(2,1,2)
 plot(f,2*abs(out_data(1:nrOfPoints/2+1)))
@@ -24,7 +24,7 @@ text(f(ix)+1/40*f(length(f)),2*abs(out_data(ix)),[num2cell(f(ix)) ' Hz'],...
      'horizontalalignment','center',...
           'fontsize',12); 
         title('frequency domain','FontSize',12)
-xlabel('frequency(Hz)')
+xlabel('frequency[Hz]')
 ylabel('|Y(f)|')
 end
 

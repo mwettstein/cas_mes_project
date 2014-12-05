@@ -10,7 +10,8 @@
 clear all; close all; clc; addpath('rsc', 'utilities');
 
 %% get the data 
-[y,Fs,nBits]=wavread('goodbye.wav');
+% [y,Fs,nBits]=wavread('goodbye.wav');
+[y,Fs,nBits]=wavread('yo_this_stuff_is_fresh.wav');
 easy_fft(y,Fs);
 sound(y,Fs);
 
@@ -31,9 +32,20 @@ for i=1:nrOfBlocks-1
     sampleMtx(:,i)= yf(i*sPerBlock-nrOfOverlaps:(i+1)*sPerBlock+nrOfOverlaps)';
 end
 
-%% windowing (wight every block with hamming window)
+%% windowing (weight every block with hamming window)
 window=hamming(length(sampleMtx(:,1)));
-sampleMtxW =diag(window)*sampleMtx;
+sampleMtxW=diag(window)*sampleMtx;
+
+%% plot windowed samples
+figure(2)
+clf;
+plot(sampleMtxW);
+hold on;
+plot(window, 'b');
+grid on;
+title('Windowed Samples');
+xlabel('Time [s]');
+ylabel('Arbitrary Amplitude');
 
 %% calculate  Mel Frequency Cepstrum Coefficients 
 % rceps = real(ifft(log(abs(fft(x)))));

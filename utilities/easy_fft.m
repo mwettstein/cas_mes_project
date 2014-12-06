@@ -10,12 +10,14 @@ f=fs/2*linspace(0,1,nrOfPoints/2+1);
 %plot
 figure('units','normalized','outerposition',[0 0 1 1]);
 clf;
-subplot(3,1,1)
-plot(in_data)
+%subplot(3,1,1)
+%axis tight;
+%plot(in_data)
 
 %% Subplot 1 - Time domain speech signal
 subplot(3,1,1)
 plot(1/fs*(1:length(in_data)),in_data)
+axis tight;
 title('time domain','FontSize',12)
 xlabel('time[s]')
 ylabel('y(t)')
@@ -23,11 +25,13 @@ ylabel('y(t)')
 %% Subplot 2 - Spectrogram of speech signal
 subplot(3,1,2)
 spectrogram(in_data, 256, 250, 256, fs, 'yaxis');
+axis tight;
 title('Spectrogram','FontSize',12);
 
 %% Subplot 3 - FFT of speech signal
 subplot(3,1,3)
 plot(f,2*abs(out_data(1:nrOfPoints/2+1)))
+axis tight;
 %mark maximum
 [my,ix]=find(abs(out_data(1:nrOfPoints/2+1))==max(abs(out_data(1:nrOfPoints/2+1))));
 line(f(ix),2*abs(out_data(ix)),...

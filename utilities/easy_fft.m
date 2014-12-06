@@ -13,7 +13,7 @@ figure('units','normalized','outerposition',[0 0 1 1]);
 subplot(3,1,1)
 plot(1/fs*(1:length(in_data)),in_data)
 title('time domain','FontSize',12)
-xlabel('time[s]]')
+xlabel('time[s]')
 ylabel('y(t)')
 
 %% Subplot 2 - Spectrogram of speech signal

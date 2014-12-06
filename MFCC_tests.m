@@ -28,7 +28,7 @@ nrOfOverlaps = ceil(nrOfBlocks/3);
 sPerBlock=floor(length(y)/nrOfBlocks);
 
 sampleMtx=zeros(sPerBlock+1+2*nrOfOverlaps,nrOfBlocks-1);
-for i=1:nrOfBlocks-1
+for i=1:nrOfBlocks-2
     sampleMtx(:,i)= yf(i*sPerBlock-nrOfOverlaps:(i+1)*sPerBlock+nrOfOverlaps)';
 end
 
@@ -39,17 +39,48 @@ sampleMtxW=diag(window)*sampleMtx;
 %% plot windowed samples
 figure(2)
 clf;
-plot(sampleMtxW);
-hold on;
-plot(window, 'b');
-grid on;
+[AX, H1, H2] = plotyy(1:length(sampleMtx(:,1)),sampleMtxW, 1:length(sampleMtx(:,1)), window);
+set(get(AX(2),'Ylabel'),'String','Window Amplitude');
+set(AX(2),'YLim', [-1 1]);
+set(AX(2),'YTick', [-1:0.5:1]);
 title('Windowed Samples');
 xlabel('Time [s]');
-ylabel('Arbitrary Amplitude');
+ylabel('Sample Amplitude');
 
-%% calculate  Mel Frequency Cepstrum Coefficients 
-% rceps = real(ifft(log(abs(fft(x)))));
-%mfccMtx=ones(length(sampleMtxW),length(sampleMtxW(1,:))) %preallocate MFCC Matrix
+%% calculate  Mel Frequency Cepstrum Coefficients
+nrOfPoints = 2^nextpow2(length(sampleMtxW(:,1)));
+
 for i=1:length(sampleMtxW(1,:))
-    mfccMtx(:,i)= rceps(sampleMtxW(:,i));
+    sampleMtxFFT(:,i) = fft(sampleMtxW(:,i), nrOfPoints)/nrOfPoints;
 end
+
+figure(3)
+clf;
+plot(1/Fs*(1:length(sampleMtxFFT(:,1))), sampleMtxFFT);
+grid on;
+title('Double sided spectras of input Samples');
+xlabel('F');
+ylabel('Amplitude');
+%% Calculate Mel frequency filter (???)
+for i=1:length(sampleMtxFFT(1,:))
+    result(:,i) = melspec(abs(sampleMtxFFT(:,i)), 25).';
+end
+
+%% Grid-plot of Mel coefficients (???)
+[xq,yq] = meshgrid(0:0.2:64, 0:0.2:25);
+result_ip = interp2(result,xq,yq);
+% griddata(result);
+figure(4)
+clf;
+gca = mesh(result_ip.');
+colormap(jet);
+% set(gca, 'LineStyle', 'none');
+grid on;
+title('Mel Coefficients');
+axis tight;
+
+%% Reserve
+%mfccMtx=ones(length(sampleMtxW),length(sampleMtxW(1,:))) %preallocate MFCC Matrix
+% for i=1:length(sampleMtxW(1,:))
+%     mfccMtx(:,i)= rceps(sampleMtxW(:,i));
+% end

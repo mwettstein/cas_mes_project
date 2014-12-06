@@ -9,9 +9,15 @@ out_data=fft(in_data,nrOfPoints)/length(in_data);
 f=fs/2*linspace(0,1,nrOfPoints/2+1);
 %plot
 figure('units','normalized','outerposition',[0 0 1 1]);
+<<<<<<< .mine
+clf;
+subplot(2,1,1)
+plot(in_data)
+=======
 %% Subplot 1 - Time domain speech signal
 subplot(3,1,1)
 plot(1/fs*(1:length(in_data)),in_data)
+>>>>>>> .r6
 title('time domain','FontSize',12)
 xlabel('time[s]')
 ylabel('y(t)')

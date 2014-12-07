@@ -7,11 +7,11 @@
 %  |_|  |_||_|     \_____|\_____|    |_| \___||___/ \__|
 %
 %-----------------------------------------------------------------
-clear all; close all; clc; addpath('rsc', 'utilities');
+clear all; close all; clc; addpath('rsc', 'utilities'); superpack;
 
 %% get the data 
 % [y,Fs,nBits]=wavread('goodbye.wav');
-[y,Fs,nBits]=wavread('yo_this_stuff_is_fresh.wav');
+[y,Fs,nBits]=wavread('goodbye.wav');
 easy_fft(y,Fs);
 sound(y,Fs);
 
@@ -47,30 +47,43 @@ title('Windowed Samples');
 xlabel('Time [s]');
 ylabel('Sample Amplitude');
 
-%% calculate  Mel Frequency Cepstrum Coefficients
+%% DFT for each block
 nrOfPoints = 2^nextpow2(length(sampleMtxW(:,1)));
-
+sampleMtxFFT=zeros(nrOfPoints/2+1,length(sampleMtxW(1,:)));
 for i=1:length(sampleMtxW(1,:))
-    sampleMtxFFT(:,i) = fft(sampleMtxW(:,i), nrOfPoints)/nrOfPoints;
+    fft_temp = 2*abs(fft(sampleMtxW(:,i), nrOfPoints)/nrOfPoints);
+    sampleMtxFFT(:,i) = fft_temp(1:nrOfPoints/2+1);
 end
+nrOfPoints=nrOfPoints/2+1; % only one-sided spectrum is used
 
 figure(3)
 clf;
-plot(1/Fs*(1:length(sampleMtxFFT(:,1))), sampleMtxFFT);
+plot(linspace(0,Fs/2,nrOfPoints), sampleMtxFFT);
 grid on;
 title('Double sided spectras of input Samples');
 xlabel('F');
 ylabel('Amplitude');
-%% Calculate Mel frequency filter (???)
-for i=1:length(sampleMtxFFT(1,:))
-    result(:,i) = melspec(abs(sampleMtxFFT(:,i)), 25).';
-end
 
+%% Calculate Mel frequency filter coeffs
+[coeffs, f]= melfiltercoeff(nrOfPoints,Fs,mel2hz,hz2mel);
+figure(4)
+clf;
+plot(f,coeffs);
+title('Mel filter coefficients');
+xlabel('frequency [Hz]');
+ylabel('Factor');
+%% Filter 
+sampleMtxFFTMel=coeffs() * sampleMtxFFT;
+%%                        
+nrOfMelCoeffs=14;  
+MtxDCT=dctm(nrOfMelCoeffs,25);
+temp =  MtxDCT * log(sampleMtxFFTMel);
+result = temp(2:14,:);
 %% Grid-plot of Mel coefficients (???)
-[xq,yq] = meshgrid(0:0.2:64, 0:0.2:25);
+[xq,yq] = meshgrid(0:0.1:13, 0:0.1:25);
 result_ip = interp2(result,xq,yq);
 % griddata(result);
-figure(4)
+figure(5)
 clf;
 gca = mesh(result_ip.');
 colormap(jet);

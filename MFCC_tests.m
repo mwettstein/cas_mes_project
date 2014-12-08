@@ -7,16 +7,26 @@
 %  |_|  |_||_|     \_____|\_____|    |_| \___||___/ \__|
 %
 %-----------------------------------------------------------------
-clear all; close all; clc; addpath('rsc', 'utilities'); superpack;
 
+clear all; 
+close all; clc; addpath('rsc', 'utilities'); superpack;
+set(0,'DefaultAxesLineStyleOrder','-|-.|--|:')
 %% get the data 
 % [y,Fs,nBits]=wavread('goodbye.wav');
 [y,Fs,nBits]=wavread('goodbye.wav');
-easy_fft(y,Fs);
+%easy_fft(y,Fs);
 sound(y,Fs);
-
+if( max(abs(y))<=1 ), y = y * 2^15; end;
+figure('units','normalized','outerposition',[0 0 1 1], 'PaperPositionMode', 'auto', ... 
+              'color', 'w', 'PaperOrientation', 'landscape', 'Visible', 'on' ); 
+clf;
+subplot(4,2,1)
+plot((1:length(y))*1/Fs,y)
+xlabel( 'Time [s]' ); 
+ylabel( 'Amplitude' ); 
+title('Original audio sample');
 %% pre-emphasize filter (Highpass) -> spectrally flatten the speech signal
- B = [1 -0.95];
+ B = [1 -0.97];
  yf = filter(B,1,y);
 
 %% divide into overlapping blocks of ~20ms
@@ -31,62 +41,83 @@ sampleMtx=zeros(sPerBlock+1+2*nrOfOverlaps,nrOfBlocks-1);
 for i=1:nrOfBlocks-2
     sampleMtx(:,i)= yf(i*sPerBlock-nrOfOverlaps:(i+1)*sPerBlock+nrOfOverlaps)';
 end
-
 %% windowing (weight every block with hamming window)
 window=hamming(length(sampleMtx(:,1)));
 sampleMtxW=diag(window)*sampleMtx;
 
 %% plot windowed samples
-figure(2)
-clf;
+subplot(4,2,3)
 [AX, H1, H2] = plotyy(1:length(sampleMtx(:,1)),sampleMtxW, 1:length(sampleMtx(:,1)), window);
 set(get(AX(2),'Ylabel'),'String','Window Amplitude');
 set(AX(2),'YLim', [-1 1]);
 set(AX(2),'YTick', [-1:0.5:1]);
 title('Windowed Samples');
 xlabel('Time [s]');
-ylabel('Sample Amplitude');
+ylabel('sample Amplitude');
 
 %% DFT for each block
 nrOfPoints = 2^nextpow2(length(sampleMtxW(:,1)));
-sampleMtxFFT=zeros(nrOfPoints/2+1,length(sampleMtxW(1,:)));
-for i=1:length(sampleMtxW(1,:))
-    fft_temp = 2*abs(fft(sampleMtxW(:,i), nrOfPoints)/nrOfPoints);
-    sampleMtxFFT(:,i) = fft_temp(1:nrOfPoints/2+1);
-end
-nrOfPoints=nrOfPoints/2+1; % only one-sided spectrum is used
+% sampleMtxFFT=zeros(nrOfPoints/2+1,length(sampleMtxW(1,:)));
+% for i=1:length(sampleMtxW(1,:))
+%     fft_temp = abs(fft(sampleMtxW(:,i), nrOfPoints)/nrOfPoints);
+%     sampleMtxFFT(:,i) = fft_temp(1:nrOfPoints/2+1);
+% end
+% nrOfPoints=nrOfPoints/2+1; % only one-sided spectrum is used
+fft_temp = abs(fft(sampleMtxW,nrOfPoints));
+sampleMtxFFT = fft_temp(1:nrOfPoints/2+1,:);
+nrOfPoints=nrOfPoints/2+1;
 
-figure(3)
-clf;
-plot(linspace(0,Fs/2,nrOfPoints), sampleMtxFFT);
+subplot(4,2,5)
+plot(linspace(0,Fs/2,nrOfPoints), sampleMtxFFT);%linspace(0,Fs/2,nrOfPoints),
 grid on;
-title('Double sided spectras of input Samples');
-xlabel('F');
+title('Single sided spectra of input Samples');
+xlabel('Frequency [Hz]');
 ylabel('Amplitude');
 
 %% Calculate Mel frequency filter coeffs
 [coeffs, f]= melfiltercoeff(nrOfPoints,Fs,mel2hz,hz2mel);
-figure(4)
-clf;
+subplot(4,2,7)
 plot(f,coeffs);
-title('Mel filter coefficients');
-xlabel('frequency [Hz]');
+title('Mel scaled triangle filterbank');
+xlabel('Frequency [Hz]');
 ylabel('Factor');
-%% Filter 
-sampleMtxFFTMel=coeffs() * sampleMtxFFT;
-%%                        
+
+%% Filter Spectra with Filterbank
+sampleMtxFFTMel=coeffs * sampleMtxFFT;
+subplot(4,2,2)
+plot(sampleMtxFFTMel);
+xlabel( 'Triangle" index' ); 
+ylabel( 'Energy' ); 
+title('Filterbank Energies (Spectra after Filter)');
+
+%% Take the Log
+sampleMtxFFTMelLog=log(sampleMtxFFTMel);
+subplot(4,2,4)
+plot(sampleMtxFFTMelLog);
+xlabel( '"Triangle" index' ); 
+ylabel( 'log scaled energy' ); 
+title( 'log scaled filterbank energies');
+
+%% DCT - Discrete Cosine Transform                       
 nrOfMelCoeffs=14;  
-MtxDCT=dctm(nrOfMelCoeffs,25);
-temp =  MtxDCT * log(sampleMtxFFTMel);
+MtxDCT=dctm(nrOfMelCoeffs,20);
+temp =  MtxDCT * (sampleMtxFFTMelLog);
+%temp = dct(log(sampleMtxFFTMel),nrOfMelCoeffs)
 result = temp(2:14,:);
+subplot(4,2,6)
+imagesc( 1/Fs*(1:(length(y))), [1:20], result ); 
+xlabel( 'Time [s]' ); 
+ylabel( 'Cepstrum index' );
+title('Mel frequency cepstrum');
+
 %% Grid-plot of Mel coefficients (???)
-[xq,yq] = meshgrid(0:0.1:13, 0:0.1:25);
+[xq,yq] = meshgrid(0:0.05:13, 0:0.05:25);
 result_ip = interp2(result,xq,yq);
 % griddata(result);
 figure(5)
 clf;
 gca = mesh(result_ip.');
-colormap(jet);
+%colormap(jet);
 % set(gca, 'LineStyle', 'none');
 grid on;
 title('Mel Coefficients');

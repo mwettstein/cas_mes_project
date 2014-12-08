@@ -4,7 +4,7 @@ depth = 24;
 %% Record 1.5 seconds
 rec = audiorecorder(fs,depth,1);
 disp('Start speaking.')
-recordblocking(rec, 1.5);
+recordblocking(rec, 3);
 disp('End of Recording.');
 %% Extract and plot audio file
 recdata = getaudiodata(rec);

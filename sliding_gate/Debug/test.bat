@@ -1,2 +1,0 @@
-ese_praktikum_03_a1_v01_lsg_v2.exe manual
-pause hallo

@@ -11,9 +11,10 @@
 clear all; 
 close all; clc; addpath('rsc', 'utilities'); superpack;
 set(0,'DefaultAxesLineStyleOrder','-|-.|--|:')
-%% get the data 
-% [y,Fs,nBits]=wavread('goodbye.wav');
-[y,Fs,nBits]=wavread('goodbye.wav');
+%% get the data
+% wavename = 'goodbye';
+wavename = 'yo_this_stuff_is_fresh';
+[y,Fs,nBits]=wavread([wavename '.wav']);
 %easy_fft(y,Fs);
 sound(y,Fs);
 if( max(abs(y))<=1 ), y = y * 2^15; end;
@@ -24,7 +25,9 @@ subplot(4,2,1)
 plot((1:length(y))*1/Fs,y)
 xlabel( 'Time [s]' ); 
 ylabel( 'Amplitude' ); 
-title('Original audio sample');
+title('Original audio sample waveform');
+axis tight;
+
 %% pre-emphasize filter (Highpass) -> spectrally flatten the speech signal
  B = [1 -0.97];
  yf = filter(B,1,y);
@@ -51,8 +54,11 @@ subplot(4,2,3)
 set(get(AX(2),'Ylabel'),'String','Window Amplitude');
 set(AX(2),'YLim', [-1 1]);
 set(AX(2),'YTick', [-1:0.5:1]);
+axis tight;
+xlim1 = get(AX(1),'XLim');
+set(AX(2),'XLim', xlim1); 
 title('Windowed Samples');
-xlabel('Time [s]');
+xlabel('Time [ms]');
 ylabel('sample Amplitude');
 
 %% DFT for each block
@@ -68,25 +74,30 @@ sampleMtxFFT = fft_temp(1:nrOfPoints/2+1,:);
 nrOfPoints=nrOfPoints/2+1;
 
 subplot(4,2,5)
-plot(linspace(0,Fs/2,nrOfPoints), sampleMtxFFT);%linspace(0,Fs/2,nrOfPoints),
+plot(linspace(0,Fs/2,nrOfPoints)/1000, sampleMtxFFT);%linspace(0,Fs/2,nrOfPoints),
 grid on;
 title('Single sided spectra of input Samples');
-xlabel('Frequency [Hz]');
+xt = get(gca,'XTick');
+%if(max(xt) > 1000)
+    %set(gca,'XTickLabel', sprintf('%4.0f|',xt))
+%end
+xlabel('Frequency [kHz]');
 ylabel('Amplitude');
+
 
 %% Calculate Mel frequency filter coeffs
 [coeffs, f]= melfiltercoeff(nrOfPoints,Fs,mel2hz,hz2mel);
 subplot(4,2,7)
-plot(f,coeffs);
+plot(f/1000,coeffs);
 title('Mel scaled triangle filterbank');
-xlabel('Frequency [Hz]');
+xlabel('Frequency [kHz]');
 ylabel('Factor');
 
 %% Filter Spectra with Filterbank
 sampleMtxFFTMel=coeffs * sampleMtxFFT;
 subplot(4,2,2)
 plot(sampleMtxFFTMel);
-xlabel( 'Triangle" index' ); 
+xlabel( '"Triangle" index' ); 
 ylabel( 'Energy' ); 
 title('Filterbank Energies (Spectra after Filter)');
 
@@ -111,17 +122,16 @@ ylabel( 'Cepstrum index' );
 title('Mel frequency cepstrum');
 
 %% Grid-plot of Mel coefficients (???)
-[xq,yq] = meshgrid(0:0.05:13, 0:0.05:25);
-result_ip = interp2(result,xq,yq);
-% griddata(result);
-figure(5)
-clf;
-gca = mesh(result_ip.');
-%colormap(jet);
-% set(gca, 'LineStyle', 'none');
-grid on;
-title('Mel Coefficients');
-axis tight;
+% [xq,yq] = meshgrid(0:0.05:13, 0:0.05:25);
+% result_ip = interp2(result,xq,yq);
+% figure(5)
+% clf;
+% gca = mesh(result_ip.');
+% grid on;
+% title('Mel Coefficients');
+% axis tight;
+
+saveas(1,[pwd '\' wavename],'png');
 
 %% Reserve
 %mfccMtx=ones(length(sampleMtxW),length(sampleMtxW(1,:))) %preallocate MFCC Matrix

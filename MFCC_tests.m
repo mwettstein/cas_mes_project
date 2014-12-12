@@ -12,7 +12,8 @@ clear all;
 close all; clc; addpath('rsc', 'utilities'); superpack;
 set(0,'DefaultAxesLineStyleOrder','-|-.|--|:')
 %% get the data
-wavename = 'mw3';
+% wavename = 'mw3';
+wavename = 'fp1';
 % wavename = 'yo_this_stuff_is_fresh';
 [y,Fs,nBits]=wavread([wavename '.wav']);
 %easy_fft(y,Fs);
@@ -129,7 +130,7 @@ title('Mel frequency cepstrum');
 %% Grid-plot of Mel coefficients (???)
 [xq,yq] = meshgrid(0:0.05:13, 0:0.05:25);
 result_ip = interp2(result,xq,yq);
-figure(5)
+figure(2)
 clf;
 gca = mesh(result_ip.');
 grid on;
@@ -138,8 +139,26 @@ axis tight;
 
 % saveas(1,[pwd '\' wavename],'png');
 
-%% Reserve
-%mfccMtx=ones(length(sampleMtxW),length(sampleMtxW(1,:))) %preallocate MFCC Matrix
-% for i=1:length(sampleMtxW(1,:))
-%     mfccMtx(:,i)= rceps(sampleMtxW(:,i));
-% end
+%% Vector Quantisation
+[idx,ctrs1] = kmeans(result', 13, 'Replicates',5);
+figure(3);
+clf;
+plot(ctrs1(:,1),ctrs1(:,2),'kx','MarkerSize',12,'LineWidth',2);
+grid on;
+axis([-5 5 -1 2]);
+title('Vector quantized squared euclidian distances');
+xlabel('');
+ylabel('');
+
+saveas(3, [pwd '\' wavename '_VC'], 'png');
+ 
+%  subplot(3,1,2) 
+%  [idx,ctrs2] = kmeans(B',13,...
+%                     'Replicates',5);
+%  plot(ctrs2(:,1),ctrs2(:,2),'kx','MarkerSize',12,'LineWidth',2)
+%  axis([-5 5 -1 2])
+%  subplot(3,1,3)
+%  [idx,ctrs3] = kmeans(C',13,...
+%                     'Replicates',5);  
+%  plot(ctrs3(:,1),ctrs3(:,2),'kx','MarkerSize',12,'LineWidth',2)
+%  axis([-5 5 -1 2])

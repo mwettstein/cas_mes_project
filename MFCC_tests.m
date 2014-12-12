@@ -12,8 +12,8 @@ clear all;
 close all; clc; addpath('rsc', 'utilities'); superpack;
 set(0,'DefaultAxesLineStyleOrder','-|-.|--|:')
 %% get the data
-% wavename = 'goodbye';
-wavename = 'yo_this_stuff_is_fresh';
+wavename = 'mw3';
+% wavename = 'yo_this_stuff_is_fresh';
 [y,Fs,nBits]=wavread([wavename '.wav']);
 %easy_fft(y,Fs);
 sound(y,Fs);
@@ -116,7 +116,7 @@ temp =  MtxDCT * (sampleMtxFFTMelLog);
 %temp = dct(log(sampleMtxFFTMel),nrOfMelCoeffs)
 result = temp(2:14,:);
 subplot(4,2,6)
-imagesc( 1/Fs*(1:(length(y))), [1:20], result ); 
+imagesc( 1/Fs*(1:(length(y))), [2:14], result ); 
 xlabel( 'Time [s]' ); 
 ylabel( 'Cepstrum index' );
 title('Mel frequency cepstrum');

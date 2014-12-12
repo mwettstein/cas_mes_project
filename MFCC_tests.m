@@ -1,5 +1,5 @@
 %------------------------------------------------------------------
-%  __  __  ______  _____  _____   _______          _   
+%   __  __  ______  _____  _____   _______          _   
 %  |  \/  ||  ____|/ ____|/ ____| |__   __|        | |  
 %  | \  / || |__  | |    | |         | |  ___  ___ | |_ 
 %  | |\/| ||  __| | |    | |         | | / _ \/ __|| __|
@@ -48,8 +48,16 @@ end
 window=hamming(length(sampleMtx(:,1)));
 sampleMtxW=diag(window)*sampleMtx;
 
-%% plot windowed samples
+%% plot spectrogram
 subplot(4,2,3)
+spectrogram(y, 256, 250, 256, Fs/1000, 'yaxis');
+axis tight;
+xlabel('Time [s]');
+ylabel('Frequency [kHz]');
+title('Spectrogram');
+
+%% plot windowed samples
+subplot(4,2,5)
 [AX, H1, H2] = plotyy(1:length(sampleMtx(:,1)),sampleMtxW, 1:length(sampleMtx(:,1)), window);
 set(get(AX(2),'Ylabel'),'String','Window Amplitude');
 set(AX(2),'YLim', [-1 1]);
@@ -73,21 +81,18 @@ fft_temp = abs(fft(sampleMtxW,nrOfPoints));
 sampleMtxFFT = fft_temp(1:nrOfPoints/2+1,:);
 nrOfPoints=nrOfPoints/2+1;
 
-subplot(4,2,5)
+subplot(4,2,7)
 plot(linspace(0,Fs/2,nrOfPoints)/1000, sampleMtxFFT);%linspace(0,Fs/2,nrOfPoints),
 grid on;
 title('Single sided spectra of input Samples');
 xt = get(gca,'XTick');
-%if(max(xt) > 1000)
-    %set(gca,'XTickLabel', sprintf('%4.0f|',xt))
-%end
 xlabel('Frequency [kHz]');
 ylabel('Amplitude');
 
 
 %% Calculate Mel frequency filter coeffs
 [coeffs, f]= melfiltercoeff(nrOfPoints,Fs,mel2hz,hz2mel);
-subplot(4,2,7)
+subplot(4,2,2)
 plot(f/1000,coeffs);
 title('Mel scaled triangle filterbank');
 xlabel('Frequency [kHz]');
@@ -95,7 +100,7 @@ ylabel('Factor');
 
 %% Filter Spectra with Filterbank
 sampleMtxFFTMel=coeffs * sampleMtxFFT;
-subplot(4,2,2)
+subplot(4,2,4)
 plot(sampleMtxFFTMel);
 xlabel( '"Triangle" index' ); 
 ylabel( 'Energy' ); 
@@ -103,7 +108,7 @@ title('Filterbank Energies (Spectra after Filter)');
 
 %% Take the Log
 sampleMtxFFTMelLog=log(sampleMtxFFTMel);
-subplot(4,2,4)
+subplot(4,2,6)
 plot(sampleMtxFFTMelLog);
 xlabel( '"Triangle" index' ); 
 ylabel( 'log scaled energy' ); 
@@ -115,23 +120,23 @@ MtxDCT=dctm(nrOfMelCoeffs,20);
 temp =  MtxDCT * (sampleMtxFFTMelLog);
 %temp = dct(log(sampleMtxFFTMel),nrOfMelCoeffs)
 result = temp(2:14,:);
-subplot(4,2,6)
+subplot(4,2,8)
 imagesc( 1/Fs*(1:(length(y))), [2:14], result ); 
 xlabel( 'Time [s]' ); 
 ylabel( 'Cepstrum index' );
 title('Mel frequency cepstrum');
 
 %% Grid-plot of Mel coefficients (???)
-% [xq,yq] = meshgrid(0:0.05:13, 0:0.05:25);
-% result_ip = interp2(result,xq,yq);
-% figure(5)
-% clf;
-% gca = mesh(result_ip.');
-% grid on;
-% title('Mel Coefficients');
-% axis tight;
+[xq,yq] = meshgrid(0:0.05:13, 0:0.05:25);
+result_ip = interp2(result,xq,yq);
+figure(5)
+clf;
+gca = mesh(result_ip.');
+grid on;
+title('Mel Coefficients');
+axis tight;
 
-saveas(1,[pwd '\' wavename],'png');
+% saveas(1,[pwd '\' wavename],'png');
 
 %% Reserve
 %mfccMtx=ones(length(sampleMtxW),length(sampleMtxW(1,:))) %preallocate MFCC Matrix

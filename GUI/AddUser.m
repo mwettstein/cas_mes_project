@@ -22,7 +22,7 @@ function varargout = AddUser(varargin)
 
 % Edit the above text to modify the response to help AddUser
 
-% Last Modified by GUIDE v2.5 12-Dec-2014 13:45:12
+% Last Modified by GUIDE v2.5 12-Dec-2014 16:57:14
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -70,8 +70,12 @@ else
     save('users.mat','users');
 end;
 
+global allusers;
+global state;
+allusers = users;
 set(handles.commands, 'String', '-- locked --')
 set(handles.editable, 'String', '')
+state = 'locked';
 
 
 
@@ -92,7 +96,14 @@ function enter_Callback(hObject, eventdata, handles)
 % hObject    handle to enter (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+global state
+global allusers
+if strcmp(get(handles.editable,'string'), '123')
+    set(handles.commands, 'String', '++ unlocked ++')
+    state = 'unlocked';
+    set(handles.list,'String',allusers.user0.name);
+end
+    
 
 
 function commands_Callback(hObject, eventdata, handles)
@@ -189,3 +200,26 @@ function AudioIdent_Callback(hObject, eventdata, handles)
 % hObject    handle to AudioIdent (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+
+function list_Callback(hObject, eventdata, handles)
+% hObject    handle to list (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of list as text
+%        str2double(get(hObject,'String')) returns contents of list as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function list_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to list (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

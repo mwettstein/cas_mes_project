@@ -10,17 +10,18 @@
 
 clear all; 
 close all; clc; addpath('rsc', 'utilities'); superpack;
-% set(0,'DefaultAxesLineStyleOrder','-|-.|--|:')
+set(0,'DefaultAxesLineStyleOrder','-|-.|--|:')
 %% get the data
 % wavename = 'mw3';
-wavename = 'mm3';
+wavename = 'fp1';
 % wavename = 'yo_this_stuff_is_fresh';
 [y,Fs,nBits]=wavread([wavename '.wav']);
 %easy_fft(y,Fs);
 sound(y,Fs);
-if( max(abs(y))<=1 ), y = y * 2^15; end;
+% if( max(abs(y))<=1 ), y = y * 2^15; end;
 figure('units','normalized','outerposition',[0 0 1 1], 'PaperPositionMode', 'auto', ... 
-              'color', 'w', 'PaperOrientation', 'landscape', 'Visible', 'on' ); 
+              'color', 'w',...% 'PaperOrientation', 'landscape',
+              'Visible', 'on' ); 
 clf;
 subplot(4,2,1)
 plot((1:length(y))*1/Fs,y)
@@ -83,10 +84,10 @@ sampleMtxFFT = fft_temp(1:nrOfPoints/2+1,:);
 nrOfPoints=nrOfPoints/2+1;
 
 subplot(4,2,7)
-plot(linspace(0,Fs/2,nrOfPoints)/1000, sampleMtxFFT);%linspace(0,Fs/2,nrOfPoints),
+semilogy(linspace(0,Fs/2,nrOfPoints)/1000, sampleMtxFFT);%linspace(0,Fs/2,nrOfPoints),
 grid on;
 title('Single sided spectra of input Samples');
-xt = get(gca,'XTick');
+% xt = get(gca,'XTick');
 xlabel('Frequency [kHz]');
 ylabel('Amplitude');
 
@@ -162,6 +163,7 @@ csvwrite([wavename '_sumd.csv'], sumd);
 
 %% finishing
 saveas(1,[pwd '\' wavename],'png');
-saveas(3,[pwd '\' wavename '_VC'],'png');
-
-close all;
+% saveas(2,[pwd '\' wavename '_mfc'], 'png');
+% saveas(3,[pwd '\' wavename '_VC'],'png');
+% 
+% close all;

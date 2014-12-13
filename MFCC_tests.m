@@ -10,10 +10,10 @@
 
 clear all; 
 close all; clc; addpath('rsc', 'utilities'); superpack;
-set(0,'DefaultAxesLineStyleOrder','-|-.|--|:')
+% set(0,'DefaultAxesLineStyleOrder','-|-.|--|:')
 %% get the data
 % wavename = 'mw3';
-wavename = 'fp1';
+wavename = 'mm3';
 % wavename = 'yo_this_stuff_is_fresh';
 [y,Fs,nBits]=wavread([wavename '.wav']);
 %easy_fft(y,Fs);
@@ -53,7 +53,7 @@ sampleMtxW=diag(window)*sampleMtx;
 subplot(4,2,3)
 spectrogram(y, 256, 250, 256, Fs/1000, 'yaxis');
 axis tight;
-xlabel('Time [s]');
+xlabel('Time [ms]');
 ylabel('Frequency [kHz]');
 title('Spectrogram');
 
@@ -127,38 +127,41 @@ xlabel( 'Time [s]' );
 ylabel( 'Cepstrum index' );
 title('Mel frequency cepstrum');
 
-%% Grid-plot of Mel coefficients (???)
-[xq,yq] = meshgrid(0:0.05:13, 0:0.05:25);
-result_ip = interp2(result,xq,yq);
+%% Grid-plot of Mel coefficients
+[xq,yq] = meshgrid(0:0.05:13, 0:0.05:25);       % generate close-mesh meshgrid for interpolation
+result_ip = interp2(result,xq,yq);              % interpolate data to close-mesh meshgrid
+
 figure(2)
 clf;
-gca = mesh(result_ip.');
+mesh(result_ip.');
+view(33, 28);                                   % change POV to AZ 33 EL 28
 grid on;
 title('Mel Coefficients');
 axis tight;
 
-% saveas(1,[pwd '\' wavename],'png');
-
 %% Vector Quantisation
-[idx,ctrs1] = kmeans(result', 13, 'Replicates',5);
+result_transp = result';                        % from here on, work with transposed matrix
+opts = statset('Display','off');
+[idx,ctrs1, sumd, D] = kmeans(result_transp, 13, 'Distance', 'sqEuclidean', 'Replicates', 150, 'options', opts);
+
 figure(3);
 clf;
-plot(ctrs1(:,1),ctrs1(:,2),'kx','MarkerSize',12,'LineWidth',2);
-grid on;
-axis([-5 5 -1 2]);
-title('Vector quantized squared euclidian distances');
-xlabel('');
-ylabel('');
+color = hsv(12);                                % generate colormap for iterative coloring in for-loop
+hold on;
 
-saveas(3, [pwd '\' wavename '_VC'], 'png');
- 
-%  subplot(3,1,2) 
-%  [idx,ctrs2] = kmeans(B',13,...
-%                     'Replicates',5);
-%  plot(ctrs2(:,1),ctrs2(:,2),'kx','MarkerSize',12,'LineWidth',2)
-%  axis([-5 5 -1 2])
-%  subplot(3,1,3)
-%  [idx,ctrs3] = kmeans(C',13,...
-%                     'Replicates',5);  
-%  plot(ctrs3(:,1),ctrs3(:,2),'kx','MarkerSize',12,'LineWidth',2)
-%  axis([-5 5 -1 2])
+for i=1:12                                      % iterative plotting
+    plot(result_transp(idx==i,1),result_transp(idx==i,2), '.', 'Color', color(i,:), 'MarkerSize',12);
+end
+
+plot(ctrs1(:,1),ctrs1(:,2),'kx','MarkerSize',12,'LineWidth',2);
+hold off;
+grid on;
+axis([-5 5 -2 4]);
+title('Vector quantized squared euclidian distances');
+csvwrite([wavename '_sumd.csv'], sumd);
+
+%% finishing
+saveas(1,[pwd '\' wavename],'png');
+saveas(3,[pwd '\' wavename '_VC'],'png');
+
+close all;

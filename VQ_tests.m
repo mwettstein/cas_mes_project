@@ -6,13 +6,14 @@
 close all; clc; addpath('rsc', 'utilities'); superpack;
 %featureplot(result(2:4,:))
 
-%X = [randn(100,2)+ones(100,2);...
+% X = [randn(100,2)+ones(100,2);...
 %     randn(100,2)-ones(100,2)];
-
+%%
 X=A';
+clf;
 [idx,ctrs] = kmeans(X,13,...
                     'Distance','city',...
-                    'Replicates',5);
+                    'Replicates',15);
 
 
 plot(X(idx==1,1),X(idx==1,2),'r.','MarkerSize',12)
@@ -29,12 +30,12 @@ plot(X(idx==10,1),X(idx==10,2),'g.','MarkerSize',12)
 plot(X(idx==11,1),X(idx==11,2),'c.','MarkerSize',12)
 plot(ctrs(:,1),ctrs(:,2),'kx',...
     'MarkerSize',12,'LineWidth',2)
-
+axis([-5 5 -3 3]);
  legend('Cluster 1','Cluster 2','Cluster3','Centroids',...
         'Location','NW')
  %%
   subplot(3,1,1)
- [idx,ctrs1] = kmeans(result',13,...
+ [idx,ctrs1] = kmeans(X,13,...
                     'Replicates',5);
 
  plot(ctrs1(:,1),ctrs1(:,2),'kx','MarkerSize',12,'LineWidth',2)

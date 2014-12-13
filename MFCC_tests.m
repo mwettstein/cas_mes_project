@@ -13,7 +13,7 @@ close all; clc; addpath('rsc', 'utilities'); superpack;
 set(0,'DefaultAxesLineStyleOrder','-|-.|--|:')
 %% get the data
 % wavename = 'mw3';
-wavename = 'fp1';
+wavename = 'mw3';
 % wavename = 'yo_this_stuff_is_fresh';
 [y,Fs,nBits]=wavread([wavename '.wav']);
 %easy_fft(y,Fs);
@@ -128,7 +128,7 @@ ylabel( 'Cepstrum index' );
 title('Mel frequency cepstrum');
 
 %% Grid-plot of Mel coefficients (???)
-[xq,yq] = meshgrid(0:0.05:13, 0:0.05:25);
+[xq,yq] = meshgrid(0:0.05:14, 0:0.05:25);
 result_ip = interp2(result,xq,yq);
 figure(2)
 clf;
@@ -140,25 +140,33 @@ axis tight;
 % saveas(1,[pwd '\' wavename],'png');
 
 %% Vector Quantisation
-[idx,ctrs1] = kmeans(result', 13, 'Replicates',5);
-figure(3);
-clf;
-plot(ctrs1(:,1),ctrs1(:,2),'kx','MarkerSize',12,'LineWidth',2);
-grid on;
-axis([-5 5 -1 2]);
-title('Vector quantized squared euclidian distances');
-xlabel('');
-ylabel('');
 
-saveas(3, [pwd '\' wavename '_VC'], 'png');
- 
-%  subplot(3,1,2) 
-%  [idx,ctrs2] = kmeans(B',13,...
-%                     'Replicates',5);
-%  plot(ctrs2(:,1),ctrs2(:,2),'kx','MarkerSize',12,'LineWidth',2)
-%  axis([-5 5 -1 2])
-%  subplot(3,1,3)
-%  [idx,ctrs3] = kmeans(C',13,...
-%                     'Replicates',5);  
-%  plot(ctrs3(:,1),ctrs3(:,2),'kx','MarkerSize',12,'LineWidth',2)
-%  axis([-5 5 -1 2])
+ %VQLBG Vector quantization using the Linde-Buzo-Gray algorithm
+d=result(:,1:67);
+k=13;
+e = .01;
+r = mean(d, 2);
+dpr = 10000;
+for i = 1:log2(k)
+    r = [r*(1+e), r*(1-e)];
+    while (1 == 1)
+        z = disteu(d, r);
+        [m,ind] = min(z, [], 2);
+        t = 0;
+        for j = 1:2^i
+            r(:, j) = mean(d(:, find(ind == j)), 2); 
+            x = disteu(d(:, find(ind == j)), r(:, j)); 
+            for q = 1:length(x)
+                t = t + x(q);
+            end
+        end
+        if (((dpr - t)/t) < e)
+            break;
+        else
+            dpr = t;
+        end
+    end
+end
+ plot(result(5, :), result(6, :), 'xr');
+ hold on;
+plot(r(5, :), r(6, :), 'vk');

@@ -26,6 +26,7 @@ codebooks{3,2}='Matthias Menzi';
 codebooks{2,2}='mm';
 codebooks{3,3}='Markus Wettstein';
 codebooks{2,3}='mw';
+%% LBG 
 %parameters for LBG ( I have no idea what I'm doing)
 k=12;
 e = .000000001;
@@ -64,9 +65,25 @@ for p=1:3
 end
 disp('codebooks generated')
 
+%% kmeans
+for p=1:3
+    A=getMFCC([codebooks{2,p} '1'],15,'wav');
+    %dirty removal of NaN column -> to be improved
+    if sum(isnan(A(1,:)))>0
+    A=A(:,1:length(A(1,:))-1);
+    end
+    X=A';
+    %[idx,ctrs] = kmeans(X,14,'Replicates',15);
+    opts = statset('Display','off');
+    [idx,ctrs,sumd,D] = kmeans(X, 14, 'Distance', 'sqEuclidean', 'Replicates', 150, 'options', opts);
+
+    r=ctrs(:,1);
+    codebooks{1,p}=r;
+end
+disp('codebooks generated')
 
 %% Automated recognition using prerecorded samples
-mfcc=getMFCC('mw3',15,'wav');
+mfcc=getMFCC('mm1',15,'wav');
 %dirty removal of NaN column -> to be improved
 if sum(isnan(mfcc(1,:)))>0
 mfcc=mfcc(:,1:length(mfcc(1,:))-1);

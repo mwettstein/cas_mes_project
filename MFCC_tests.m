@@ -13,7 +13,7 @@ close all; clc; addpath('rsc', 'utilities'); superpack;
 set(0,'DefaultAxesLineStyleOrder','-|-.|--|:')
 %% get the data
 % wavename = 'mw3';
-wavename = 'mw3';
+wavename = 'fp3';
 % wavename = 'yo_this_stuff_is_fresh';
 [y,Fs,nBits]=wavread([wavename '.wav']);
 %easy_fft(y,Fs);
@@ -34,16 +34,30 @@ axis tight;
  yf = filter(B,1,y);
 
 %% divide into overlapping blocks of ~20ms
-blockLength = 20e-3;  %to be adjusted
-speechLength = (length(yf)*1/Fs);  
-nrOfBlocks = floor(speechLength/blockLength);
-samplesPerBlock =  blockLength*Fs;
-nrOfOverlaps = ceil(nrOfBlocks/3);
-sPerBlock=floor(length(y)/nrOfBlocks);
+% blockLength = 20e-3;  %to be adjusted
+% speechLength = (length(yf)*1/Fs);  
+% nrOfBlocks = floor(speechLength/blockLength);
+% samplesPerBlock =  blockLength*Fs;
+% nrOfOverlaps = ceil(nrOfBlocks/3);
+% sPerBlock=floor(length(yf)/nrOfBlocks);
+% 
+% sampleMtx=zeros(sPerBlock+1+2*nrOfOverlaps,nrOfBlocks-1);
+% for i=1:nrOfBlocks-2
+%     sampleMtx(:,i)= yf(i*sPerBlock-nrOfOverlaps:(i+1)*sPerBlock+nrOfOverlaps)';
+% end
 
-sampleMtx=zeros(sPerBlock+1+2*nrOfOverlaps,nrOfBlocks-1);
-for i=1:nrOfBlocks-2
-    sampleMtx(:,i)= yf(i*sPerBlock-nrOfOverlaps:(i+1)*sPerBlock+nrOfOverlaps)';
+%% alternative division into overlapping blocks
+blockLength = 25e-3;  %to be adjusted
+overlapLength = 10e-3;
+speechLength = (length(yf)*1/Fs);  
+nrOfBlocks = floor(speechLength/(blockLength-overlapLength));
+samplesPerBlock =  floor(blockLength*Fs);
+nrOfOverlaps = ceil(nrOfBlocks/(blockLength/overlapLength));
+% sPerBlock=floor(length(yf)/nrOfBlocks);
+
+sampleMtx = zeros(samplesPerBlock,nrOfBlocks);
+for i=1:nrOfBlocks-1
+    sampleMtx(:,i) = yf((i-1)*floor((blockLength-overlapLength)*Fs)+1:(i-1)*floor((blockLength-overlapLength)*Fs)+samplesPerBlock)';
 end
 %% windowing (weight every block with hamming window)
 window=hamming(length(sampleMtx(:,1)));

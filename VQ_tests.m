@@ -11,7 +11,7 @@
 %set(0,'DefaultAxesLineStyleOrder','-|-.|--|:')called a codeword. 
 %Thecollection of all codewords is called a codebook
 %vdqtool
-%%clear all; 
+clear all; 
 close all; clc; addpath('rsc', 'utilities'); superpack;
 
 
@@ -27,10 +27,10 @@ codebooks{2,2}='mm';
 codebooks{3,3}='Markus Wettstein';
 codebooks{2,3}='mw';
 %parameters for LBG ( I have no idea what I'm doing)
-k=16;
-e = .00001;
+k=12;
+e = .000000001;
 for p=1:3
-    A=getMFCC([codebooks{2,p} '1'],14,'wav');
+    A=getMFCC([codebooks{2,p} '1'],15,'wav');
     %dirty removal of NaN column -> to be improved
     if sum(isnan(A(1,:)))>0
     A=A(:,1:length(A(1,:))-1);
@@ -66,7 +66,7 @@ disp('codebooks generated')
 
 
 %% Automated recognition using prerecorded samples
-mfcc=getMFCC('fp2',14,'wav');
+mfcc=getMFCC('mw3',15,'wav');
 %dirty removal of NaN column -> to be improved
 if sum(isnan(mfcc(1,:)))>0
 mfcc=mfcc(:,1:length(mfcc(1,:))-1);
@@ -76,11 +76,12 @@ for p=1:3
     distance(p)=sum(min(d,[],2))/size(d,1);
 end
 [~,winner]=min(distance);
+distance
 disp(['nearest match: ' codebooks{3,winner}]);
 
 
 %% Automated recognition microphone sample
-mfcc=getMFCC(getMicSample,14,'vect');
+mfcc=getMFCC(getMicSample,15,'vect');
 %dirty removal of NaN column -> to be improved
 if sum(isnan(mfcc(1,:)))>0
 mfcc=mfcc(:,1:length(mfcc(1,:))-1);

@@ -1,51 +1,93 @@
+%--------------------------------------------------------------------------
+% __     _____    _____         _       
+%  \ \   / / _ \  |_   _|__  ___| |_ ___ 
+%   \ \ / / | | |   | |/ _ \/ __| __/ __|
+%    \ V /| |_| |   | |  __/\__ \ |_\__ \
+%     \_/  \__\_\   |_|\___||___/\__|___/
+%                                      
+%--------------------------------------------------------------------------
 %pattern recognition using Vector quantization
 %Each region is called a cluster and can be represented by its center 
-%set(0,'DefaultAxesLineStyleOrder','-|-.|--|:')called a codeword. Thecollection of all codewords is called a codebook
+%set(0,'DefaultAxesLineStyleOrder','-|-.|--|:')called a codeword. 
+%Thecollection of all codewords is called a codebook
 %vdqtool
 %%clear all; 
 close all; clc; addpath('rsc', 'utilities'); superpack;
-%featureplot(result(2:4,:))
-
-%X = [randn(100,2)+ones(100,2);...
-%     randn(100,2)-ones(100,2)];
-
-X=A';
-[idx,ctrs] = kmeans(X,13,...
-                    'Distance','city',...
-                    'Replicates',5);
 
 
-plot(X(idx==1,1),X(idx==1,2),'r.','MarkerSize',12)
-hold on
-plot(X(idx==2,1),X(idx==2,2),'b.','MarkerSize',12)
-plot(X(idx==3,1),X(idx==3,2),'g.','MarkerSize',12)
-plot(X(idx==4,1),X(idx==4,2),'c.','MarkerSize',12)
-plot(X(idx==5,1),X(idx==5,2),'m.','MarkerSize',12)
-plot(X(idx==6,1),X(idx==6,2),'b.','MarkerSize',12)
-plot(X(idx==7,1),X(idx==7,2),'y.','MarkerSize',12)
-plot(X(idx==8,1),X(idx==8,2),'r.','MarkerSize',12)
-plot(X(idx==9,1),X(idx==9,2),'b.','MarkerSize',12)
-plot(X(idx==10,1),X(idx==10,2),'g.','MarkerSize',12)
-plot(X(idx==11,1),X(idx==11,2),'c.','MarkerSize',12)
-plot(ctrs(:,1),ctrs(:,2),'kx',...
-    'MarkerSize',12,'LineWidth',2)
+%% get Codebooks
+%generate cell with names, abbreviations and placeholders for the actual
+%codebook (Rows: 1-> codebook 2-> abbreviation 3-> Full name 
+%Columns: person):
+codebooks=cell(3,3);
+codebooks{3,1}='Fabian Pfäffli';
+codebooks{2,1}='fp';
+codebooks{3,2}='Matthias Menzi';
+codebooks{2,2}='mm';
+codebooks{3,3}='Markus Wettstein';
+codebooks{2,3}='mw';
+%parameters for LBG ( I have no idea what I'm doing)
+k=16;
+e = .00001;
+for p=1:3
+    A=getMFCC([codebooks{2,p} '1'],14,'wav');
+    %dirty removal of NaN column -> to be improved
+    if sum(isnan(A(1,:)))>0
+    A=A(:,1:length(A(1,:))-1);
+    end
+    d=A;
+    %VQ - Vector quantization using LBG Algorithm
+    r= mean(d, 2); % column vector containing the mean value of each row
+    tic
+    dpr = 1e8;
+    for i = 1:log2(k)
+     r = [r*(1+e), r*(1-e)]; % double the size of the current codebook by splitting each current codebook accordingly
+      while (true) % do while-loop
+         z = euDist(d, r);
+         [m,ind] = min(z, [], 2);                                                                                                                                    
+         t = 0;
+         for j = 1:2^i
+             r(:, j) = mean(d(:, find(ind == j)), 2); 
+             x = euDist(d(:, find(ind == j)), r(:, j)); 
+             for q = 1:length(x)
+                 t = t + x(q);
+             end
+         end
+         if (((dpr - t)/t) < e) 
+             codebooks{1,p}=r;
+             break; % while part of the do-while loop
+            else
+                dpr = t;
+         end
+     end
+    end
+end
+disp('codebooks generated')
 
- legend('Cluster 1','Cluster 2','Cluster3','Centroids',...
-        'Location','NW')
- %%
-  subplot(3,1,1)
- [idx,ctrs1] = kmeans(result',13,...
-                    'Replicates',5);
 
- plot(ctrs1(:,1),ctrs1(:,2),'kx','MarkerSize',12,'LineWidth',2)
- axis([-5 5 -1 2])
- subplot(3,1,2) 
- [idx,ctrs2] = kmeans(B',13,...
-                    'Replicates',5);
- plot(ctrs2(:,1),ctrs2(:,2),'kx','MarkerSize',12,'LineWidth',2)
- axis([-5 5 -1 2])
- subplot(3,1,3)
- [idx,ctrs3] = kmeans(C',13,...
-                    'Replicates',5);  
- plot(ctrs3(:,1),ctrs3(:,2),'kx','MarkerSize',12,'LineWidth',2)
- axis([-5 5 -1 2])
+%% Automated recognition using prerecorded samples
+mfcc=getMFCC('fp2',14,'wav');
+%dirty removal of NaN column -> to be improved
+if sum(isnan(mfcc(1,:)))>0
+mfcc=mfcc(:,1:length(mfcc(1,:))-1);
+end
+for p=1:3
+    d=euDist(mfcc,codebooks{1,p});
+    distance(p)=sum(min(d,[],2))/size(d,1);
+end
+[~,winner]=min(distance);
+disp(['nearest match: ' codebooks{3,winner}]);
+
+
+%% Automated recognition microphone sample
+mfcc=getMFCC(getMicSample,14,'vect');
+%dirty removal of NaN column -> to be improved
+if sum(isnan(mfcc(1,:)))>0
+mfcc=mfcc(:,1:length(mfcc(1,:))-1);
+end
+for p=1:3
+    d=euDist(mfcc,codebooks{1,p});
+    distance(p)=sum(min(d,[],2))/size(d,1);
+end
+[~,winner]=min(distance);
+disp(['nearest match: ' codebooks{3,winner}]);

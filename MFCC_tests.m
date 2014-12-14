@@ -140,18 +140,24 @@ axis tight;
 % saveas(1,[pwd '\' wavename],'png');
 
 %% Vector Quantisation
-
+A=getMFCC('fp2',14)
+%dirty removal of NaN column -> to be improved
+if sum(isnan(A(1,:)))>0
+A=A(:,1:length(A(1,:))-1)
+end
+%%
  %VQLBG Vector quantization using the Linde-Buzo-Gray algorithm
-d=result(:,1:67);
-k=13;
-e = .01;
-r = mean(d, 2);
-dpr = 10000;
+d=A;
+k=16;
+e = .00001;
+r = mean(d, 2); % column vector containing the mean value of each row
+tic
+dpr = 1e8;
 for i = 1:log2(k)
-    r = [r*(1+e), r*(1-e)];
-    while (1 == 1)
+    r = [r*(1+e), r*(1-e)]; % double zhe size of the current codebook by splitting each current codebook accordingly
+    while (true) % do while-loop
         z = disteu(d, r);
-        [m,ind] = min(z, [], 2);
+        [m,ind] = min(z, [], 2);                                                                                                                                    
         t = 0;
         for j = 1:2^i
             r(:, j) = mean(d(:, find(ind == j)), 2); 
@@ -160,13 +166,12 @@ for i = 1:log2(k)
                 t = t + x(q);
             end
         end
-        if (((dpr - t)/t) < e)
-            break;
+        if (((dpr - t)/t) < e) 
+            break; % while part of the do-while loop
         else
             dpr = t;
         end
     end
 end
- plot(result(5, :), result(6, :), 'xr');
- hold on;
+toc
 plot(r(5, :), r(6, :), 'vk');

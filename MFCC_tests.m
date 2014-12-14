@@ -9,14 +9,15 @@
 %-----------------------------------------------------------------
 
 clear all; 
-close all; clc; addpath('rsc', 'utilities'); superpack;
-set(0,'DefaultAxesLineStyleOrder','-|-.|--|:')
+close all; clc; addpath('rsc', 'utilities'); superpack; format short;
+set(0,'DefaultAxesLineStyleOrder','-|-.|--|:');
+
 %% get the data
 % wavename = 'mw3';
-wavename = 'fp1';
+wavename = 'mm1';
 % wavename = 'yo_this_stuff_is_fresh';
-[y,Fs,nBits]=wavread([wavename '.wav']);
-%easy_fft(y,Fs);
+[y,Fs] = audioread([wavename '.wav']);
+y = y/max(abs(y));                  % normalize audio
 sound(y,Fs);
 % if( max(abs(y))<=1 ), y = y * 2^15; end;
 figure('units','normalized','outerposition',[0 0 1 1], 'PaperPositionMode', 'auto', ... 
@@ -25,8 +26,8 @@ figure('units','normalized','outerposition',[0 0 1 1], 'PaperPositionMode', 'aut
 clf;
 subplot(4,2,1)
 plot((1:length(y))*1/Fs,y)
-xlabel( 'Time [s]' ); 
-ylabel( 'Amplitude' ); 
+xlabel( 'Time [s]' );
+ylabel( 'Amplitude' );
 title('Original audio sample waveform');
 axis tight;
 
@@ -35,17 +36,32 @@ axis tight;
  yf = filter(B,1,y);
 
 %% divide into overlapping blocks of ~20ms
-blockLength = 20e-3;  %to be adjusted
-speechLength = (length(yf)*1/Fs);  
-nrOfBlocks = floor(speechLength/blockLength);
-samplesPerBlock =  blockLength*Fs;
-nrOfOverlaps = ceil(nrOfBlocks/3);
-sPerBlock=floor(length(y)/nrOfBlocks);
+% blockLength = 20e-3;  %to be adjusted
+% speechLength = (length(yf)*1/Fs);  
+% nrOfBlocks = floor(speechLength/blockLength);
+% samplesPerBlock =  blockLength*Fs;
+% nrOfOverlaps = ceil(nrOfBlocks/3);
+% sPerBlock=floor(length(yf)/nrOfBlocks);
+% 
+% sampleMtx=zeros(sPerBlock+1+2*nrOfOverlaps,nrOfBlocks-1);
+% for i=1:nrOfBlocks-2
+%     sampleMtx(:,i)= yf(i*sPerBlock-nrOfOverlaps:(i+1)*sPerBlock+nrOfOverlaps)';
+% end
 
-sampleMtx=zeros(sPerBlock+1+2*nrOfOverlaps,nrOfBlocks-1);
-for i=1:nrOfBlocks-2
-    sampleMtx(:,i)= yf(i*sPerBlock-nrOfOverlaps:(i+1)*sPerBlock+nrOfOverlaps)';
+%% alternative division into overlapping blocks
+blockLength = 25e-3;  %to be adjusted
+overlapLength = 10e-3;
+speechLength = (length(yf)*1/Fs);  
+nrOfBlocks = floor(speechLength/(blockLength-overlapLength));
+samplesPerBlock =  floor(blockLength*Fs);
+nrOfOverlaps = ceil(nrOfBlocks/(blockLength/overlapLength));
+% sPerBlock=floor(length(yf)/nrOfBlocks);
+
+sampleMtx = zeros(samplesPerBlock,nrOfBlocks);
+for i=1:nrOfBlocks-1
+    sampleMtx(:,i) = yf((i-1)*floor((blockLength-overlapLength)*Fs)+1:(i-1)*floor((blockLength-overlapLength)*Fs)+samplesPerBlock)';
 end
+
 %% windowing (weight every block with hamming window)
 window=hamming(length(sampleMtx(:,1)));
 sampleMtxW=diag(window)*sampleMtx;
@@ -60,13 +76,13 @@ title('Spectrogram');
 
 %% plot windowed samples
 subplot(4,2,5)
-[AX, H1, H2] = plotyy(1:length(sampleMtx(:,1)),sampleMtxW, 1:length(sampleMtx(:,1)), window);
-set(get(AX(2),'Ylabel'),'String','Window Amplitude');
-set(AX(2),'YLim', [-1 1]);
-set(AX(2),'YTick', [-1:0.5:1]);
+plot(1000*(1:length(sampleMtx(:,1)))/Fs,sampleMtxW);
+% set(get(AX(2),'Ylabel'),'String','Window Amplitude');
+% set(AX(2),'YLim', [-1 1]);
+% set(AX(2),'YTick', [-1:0.5:1]);
 axis tight;
-xlim1 = get(AX(1),'XLim');
-set(AX(2),'XLim', xlim1); 
+% xlim1 = get(AX(1),'XLim');
+% set(AX(2),'XLim', xlim1); 
 title('Windowed Samples');
 xlabel('Time [ms]');
 ylabel('sample Amplitude');
@@ -80,14 +96,16 @@ nrOfPoints = 2^nextpow2(length(sampleMtxW(:,1)));
 % end
 % nrOfPoints=nrOfPoints/2+1; % only one-sided spectrum is used
 fft_temp = abs(fft(sampleMtxW,nrOfPoints));
-sampleMtxFFT = fft_temp(1:nrOfPoints/2+1,:);
 nrOfPoints=nrOfPoints/2+1;
+sampleMtxFFT = fft_temp(1:nrOfPoints,:);
 
 subplot(4,2,7)
-semilogy(linspace(0,Fs/2,nrOfPoints)/1000, sampleMtxFFT);%linspace(0,Fs/2,nrOfPoints),
+% plot(linspace(0,Fs/2,nrOfPoints)/1000, sampleMtxFFT(:,1:10:65));%linspace(0,Fs/2,nrOfPoints),
+semilogy(linspace(0,Fs/2,nrOfPoints)/1000, sampleMtxFFT(:,1:10:65));%linspace(0,Fs/2,nrOfPoints),
 grid on;
-title('Single sided spectra of input Samples');
-% xt = get(gca,'XTick');
+title('Single sided spectra of input Samples (excerpt)');
+axis tight;
+xt = get(gca,'XLim');
 xlabel('Frequency [kHz]');
 ylabel('Amplitude');
 
@@ -97,6 +115,7 @@ ylabel('Amplitude');
 subplot(4,2,2)
 plot(f/1000,coeffs);
 title('Mel scaled triangle filterbank');
+set(gca, 'XLim', xt);
 xlabel('Frequency [kHz]');
 ylabel('Factor');
 
@@ -105,7 +124,7 @@ sampleMtxFFTMel=coeffs * sampleMtxFFT;
 subplot(4,2,4)
 plot(sampleMtxFFTMel);
 xlabel( '"Triangle" index' ); 
-ylabel( 'Energy' ); 
+ylabel( 'Energy' );
 title('Filterbank Energies (Spectra after Filter)');
 
 %% Take the Log
@@ -120,7 +139,7 @@ title( 'log scaled filterbank energies');
 nrOfMelCoeffs=14;  
 MtxDCT=dctm(nrOfMelCoeffs,20);
 temp =  MtxDCT * (sampleMtxFFTMelLog);
-%temp = dct(log(sampleMtxFFTMel),nrOfMelCoeffs)
+% temp = dct(log(sampleMtxFFTMel),nrOfMelCoeffs)
 result = temp(2:14,:);
 subplot(4,2,8)
 imagesc( 1/Fs*(1:(length(y))), [2:14], result ); 
@@ -143,7 +162,7 @@ axis tight;
 %% Vector Quantisation
 result_transp = result';                        % from here on, work with transposed matrix
 opts = statset('Display','off');
-[idx,ctrs1, sumd, D] = kmeans(result_transp, 13, 'Distance', 'sqEuclidean', 'Replicates', 150, 'options', opts);
+[idx,ctrs1,sumd,D] = kmeans(result_transp, 13, 'Distance', 'sqEuclidean', 'Replicates', 150, 'options', opts);
 
 figure(3);
 clf;
@@ -163,7 +182,7 @@ csvwrite([wavename '_sumd.csv'], sumd);
 
 %% finishing
 saveas(1,[pwd '\' wavename],'png');
-% saveas(2,[pwd '\' wavename '_mfc'], 'png');
-% saveas(3,[pwd '\' wavename '_VC'],'png');
-% 
-% close all;
+saveas(2,[pwd '\' wavename '_mfc'], 'png');
+saveas(3,[pwd '\' wavename '_VC'],'png');
+
+close all;

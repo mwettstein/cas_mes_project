@@ -68,7 +68,7 @@ disp('codebooks generated')
 %% kmeans
 rng(1)
 for p=1:3
-    A=getMFCC([codebooks{2,p} '1'],20,'wav');
+    A=getMFCC([codebooks{2,p} '1'],16,'wav');
     %dirty removal of NaN column -> to be improved
     if sum(isnan(A(1,:)))>0
     A=A(:,1:length(A(1,:))-1);
@@ -76,15 +76,19 @@ for p=1:3
     X=A';
     %[idx,ctrs] = kmeans(X,14,'Replicates',15);
     opts = statset('Display','off');
-    [idx,ctrs,sumd,D] = kmeans(X, 14, 'Distance', 'sqEuclidean', 'Replicates', 150, 'options', opts);
-figure(3);
+    [idx,ctrs,sumd,D] = kmeans(X, 20, 'Distance', 'sqEuclidean', 'Replicates', 15, 'options', opts);
+figure(1);
 clf;
 color = hsv(12);                                % generate colormap for iterative coloring in for-loop
-hold on;
+hold all;
 
-% for i=1:12                                      % iterative plotting
+ for i=1:12  
 %     plot(X(idx==i,1),X(idx==i,2), '.', 'Color', color(i,:), 'MarkerSize',12);
-% end
+%set(gca,'Color',color(i,:))
+    plot3(X(idx==i,1),X(idx==i,2),X(idx==i,3),'.','MarkerFaceColor',color(i,:))
+ end
+ plot3(ctrs(:,1),ctrs(:,2),ctrs(:,3),'*','MarkerFaceColor','black','MarkerSize',8);
+
 %plot(ctrs(:,1),ctrs(:,2),'kx','MarkerSize',12,'LineWidth',2);
 hold off;
 grid on;
@@ -116,7 +120,7 @@ mfcc=mfcc(:,1:length(mfcc(1,:))-1);
 end
 for p=1:3
     d=euDist(mfcc,codebooks{1,p});
-    distance(p)=sum(min(d,[],2))/size(d,1);
+    distance(p)=sum(min(d,[],2))/size(d,1)
 end
 [~,winner]=min(distance);
 disp(['nearest match: ' codebooks{3,winner}]);

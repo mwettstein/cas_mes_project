@@ -85,5 +85,3 @@ MtxDCT=dctm(nrOfMelCoeffs,20);
 %temp =  MtxDCT * (sampleMtxFFTMelLog);
 mfcc= dct((sampleMtxFFTMelLog));
 
-%lifter = ceplifter( nrOfMelCoeffs-1, 22 );
-%mfcc = diag( lifter ) * mfcc;

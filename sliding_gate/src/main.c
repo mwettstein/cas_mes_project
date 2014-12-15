@@ -5,6 +5,7 @@
 #include "digitalInput.h"
 //#include <../../../../barebone/tc/arm-none-linux-gnueabi/include/c++/4.9.1/tr1/cstdio.h>
 #include <stdio.h>
+//#include <stdlib.h>
 
 #define TICKS_PER_SECOND  10
 unsigned int z_phys = 0;
@@ -79,7 +80,7 @@ void initDigitalInputs()
 	DigitalInput_setInitialValue(&button1,1);
 	DigitalInput_setInitialValue(&button2,1);
 	DigitalInput_setInitialValue(&doorNotOpend,1);
-	DigitalInput_setInitialValue(&doorNotClosed,0);
+	DigitalInput_setInitialValue(&doorNotClosed,1);
 	DigitalInput_setInitialValue(&lightBarrierClear,1);
 }
 
@@ -89,7 +90,7 @@ unsigned long newWaitTime = 0;
 
 const uint16_t loopMax = 10000;
 
-/*void detectAndHandleEvents()
+void detectAndHandleEvents()
 {
 	//set old values to defined initial states
 	//these are part of the interface definition
@@ -124,37 +125,44 @@ const uint16_t loopMax = 10000;
     }
 
 	while(TRG_PENDING_.ANY_) {TRG_STEP_();}
-}*/
+}
 
 void runCycle(void)
 {
   int8_t edge = 0;
-  
+
   OUT_driveOutChannel_open();       // activate motor to open door
+  //printf("Opening gate\n");
+
   do
   {
+    //lastTimeMillis = millis();
     edge = DigitalInput_detectEdge(&doorNotOpend);
   }
   while(edge!= fallingEdge);        // wait for door to be opened
-  
+
   OUT_driveOutChannel_stop();       // stop motor
-  
+  //printf("Gate stop\n");
+
   newWaitTime = millis() + waitTime;
+
   do
   {
     lastTimeMillis = millis();
   }
   while(lastTimeMillis < newWaitTime);  // wait for 3s
-  
-  OUT_driveOutChannel_open();       // activate motor to close door
-  
+
+  OUT_driveOutChannel_close();       // activate motor to close door
+  //printf("Closing gate\n");
+
   do
   {
    	edge = DigitalInput_detectEdge(&doorNotClosed);
   }
   while(edge!= fallingEdge);        // wait for door to be closed
-  
+
   OUT_driveOutChannel_stop();       // stop motor
+  //printf("Gate stop\n");
 }
 
 int main()
@@ -165,42 +173,27 @@ int main()
 
 	lastTimeMillis = millis();
 
-  char term_input[8];
-  
+  char term_input[20];
+
 	if(!fINIT_()) {return 1;} //init reactive machine
 
-	printf("READY!\n");
-	
+	printf("READY\n");
+
   while(1)
 	{
-    //scanf("%s", term_input);
+    printf("Command: ");
+    readline(term_input, 20);
 
-    if(term_input == "run")
+    if(!strcmp(term_input, "run"))
     {
-      printf("Running Cycle!\n");
-      runCycle(); //detectAndHandleEvents();
-      printf("Cycle has ended\n");
+      printf("\nack\n");
+      runCycle();
+      //printf("Cycle has ended\n");
     }
-  
+
     else
     {
-      printf("input argument %s not known. Try again!\n", term_input);
+      printf("\nnack\n", term_input);
     }
 	}
 }
-
-//error Context, not used here
-    
-/*
-void uECONTXT_(struct tCONTXT_ *error_)
-{
-}
-
-void iERROR_(void)
-{
-// Initialization of Error Function Interface
-// not used here
-    ERR_.ECONTXT_ = uECONTXT_;
-}
-
-*/

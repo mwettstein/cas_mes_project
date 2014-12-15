@@ -94,7 +94,7 @@ end
 disp('codebooks generated')
 
 %% Automated recognition using prerecorded samples
-mfcc=getMFCC('fp3',15,'wav');
+mfcc=getMFCC('fp1',15,'wav');
 %dirty removal of NaN column -> to be improved
 if sum(isnan(mfcc(1,:)))>0
 mfcc=mfcc(:,1:length(mfcc(1,:))-1);
@@ -109,7 +109,7 @@ disp(['nearest match: ' codebooks{3,winner}]);
 
 
 %% Automated recognition microphone sample
-mfcc=getMFCC(getMicSample,15,'vect');
+mfcc=gegetMFCC(getMicSample,15,'vect');
 %dirty removal of NaN column -> to be improved
 if sum(isnan(mfcc(1,:)))>0
 mfcc=mfcc(:,1:length(mfcc(1,:))-1);

@@ -66,6 +66,7 @@ end
 disp('codebooks generated')
 
 %% kmeans
+rng(1)
 for p=1:3
     A=getMFCC([codebooks{2,p} '1'],15,'wav');
     %dirty removal of NaN column -> to be improved
@@ -76,14 +77,24 @@ for p=1:3
     %[idx,ctrs] = kmeans(X,14,'Replicates',15);
     opts = statset('Display','off');
     [idx,ctrs,sumd,D] = kmeans(X, 14, 'Distance', 'sqEuclidean', 'Replicates', 150, 'options', opts);
+figure(3);
+clf;
+color = hsv(12);                                % generate colormap for iterative coloring in for-loop
+hold on;
 
-    r=ctrs(:,1);
+for i=1:12                                      % iterative plotting
+    plot(X(idx==i,1),X(idx==i,2), '.', 'Color', color(i,:), 'MarkerSize',12);
+end
+plot(ctrs(:,1),ctrs(:,2),'kx','MarkerSize',12,'LineWidth',2);
+hold off;
+grid on;
+    r=ctrs;
     codebooks{1,p}=r;
 end
 disp('codebooks generated')
 
 %% Automated recognition using prerecorded samples
-mfcc=getMFCC('mm1',15,'wav');
+mfcc=getMFCC('fp3',15,'wav');
 %dirty removal of NaN column -> to be improved
 if sum(isnan(mfcc(1,:)))>0
 mfcc=mfcc(:,1:length(mfcc(1,:))-1);

@@ -21,7 +21,7 @@ end
 d = zeros(N, P);
 for ii=1:N 
     for jj=1:P 
-        d(ii,jj) = wDistance(x(:,ii),y(:,jj),0); 
+        d(ii,jj) = wDistance(x(:,ii),y(:,jj),2); 
     end 
 end
 end

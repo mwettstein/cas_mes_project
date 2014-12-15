@@ -109,7 +109,7 @@ disp(['nearest match: ' codebooks{3,winner}]);
 
 
 %% Automated recognition microphone sample
-mfcc=gegetMFCC(getMicSample,15,'vect');
+mfcc=getMFCC(getMicSample,15,'vect');
 %dirty removal of NaN column -> to be improved
 if sum(isnan(mfcc(1,:)))>0
 mfcc=mfcc(:,1:length(mfcc(1,:))-1);

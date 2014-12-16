@@ -60,8 +60,10 @@ guidata(hObject, handles);
 
 % UIWAIT makes WelcomeVoice wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
+global allusers; 
 if exist('users.mat', 'file') == 2 
     load('users.mat');
+    allusers = users;
 end;
 
     

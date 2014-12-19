@@ -52,15 +52,16 @@ sampleMtxW=diag(window)*sampleMtx;
 % fft_temp = (abs(fft(sampleMtxW,nrOfPoints))).^2;
 % sampleMtxFFT = fft_temp(1:nrOfPoints/2+1,:);
 % nrOfPoints=nrOfPoints/2+1;
-for i = 1:length(sampleMtxW(1,:))
-    sampleMtxFFT(:,i) = fft(sampleMtxW(:, i));
-end
+% for i = 1:length(sampleMtxW(1,:))
+    sampleMtxFFT = fft(sampleMtxW);
+% end
 %% Calculate Mel frequency filter coeffs
 
-coeffs = melfiltercoeff(20, length(sampleMtxFFT)-1, Fs);
-%plot(linspace(0, (Fs/2), n/2+1), coeffs'),
+% coeffs = melfiltercoeff(24, length(sampleMtxFFT)-1, Fs);
+coeffs = melfiltercoeff_old(20, length(sampleMtxFFT)-1, Fs, mel2hz, hz2mel);
+% plot(linspace(0, (Fs/2), length(coeffs)), coeffs'),
 %% Filter Spectra with Filterbank
-sampleMtxFFTMel=coeffs * abs(sampleMtxFFT(1:length(sampleMtxFFT)/2, :)).^2;
+sampleMtxFFTMel=coeffs * abs(sampleMtxFFT(1:length(sampleMtxFFT)-1, :)).^2;
 
 %% Take the Log
 sampleMtxFFTMelLog=log(sampleMtxFFTMel);

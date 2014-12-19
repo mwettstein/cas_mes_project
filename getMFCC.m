@@ -4,7 +4,7 @@ superpack;
 %% get the data
 if strcmp(mode,'wav')
     [y,Fs,nBits]=wavread([wavname '.wav']);
-    if( max(abs(y))<=1 ), y = y * 2^15; end; 
+ %   if( max(abs(y))<=1 ), y = y * 2^15; end; 
 elseif strcmp(mode,'vect')
     y=wavname(:,1);
     Fs=wavname(1,2); %default
@@ -15,7 +15,7 @@ end
 %% pre-emphasize filter (Highpass) -> spectrally flatten the speech signal
   B = [1 -0.97];
 %  M = filter(B,1,M);
-yf=filter(B,1,y);
+ yf = filter(B,1,y);
 %% divide into overlapping blocks of ~20ms
 % blockLength = 20e-3;  %to be adjusted
 % speechLength = (length(yf)*1/Fs);  
@@ -70,5 +70,5 @@ sampleMtxFFTMelLog=log(sampleMtxFFTMel);
 %MtxDCT=dctm(nrOfMelCoeffs,20);
 %temp =  MtxDCT * (sampleMtxFFTMelLog);
 mfcc= dct((sampleMtxFFTMelLog));
-mfcc=mfcc(2:length(mfcc));
-size(mfcc);
+mfcc=mfcc(2:20,:);
+

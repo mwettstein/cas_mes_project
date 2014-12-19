@@ -68,7 +68,7 @@ disp('codebooks generated')
 %% kmeans
 rng(1)
 for p=1:3
-    A=getMFCC([codebooks{2,p} '1'],16,'wav');
+    A=getMFCC([codebooks{2,p} '1'],15,'wav');
     %dirty removal of NaN column -> to be improved
     if sum(isnan(A(1,:)))>0
     A=A(:,1:length(A(1,:))-1);
@@ -77,28 +77,28 @@ for p=1:3
     %[idx,ctrs] = kmeans(X,14,'Replicates',15);
     opts = statset('Display','off');
     [idx,ctrs,sumd,D] = kmeans(X, 20, 'Distance', 'sqEuclidean', 'Replicates', 15, 'options', opts);
-figure(1);
-clf;
-color = hsv(12);                                % generate colormap for iterative coloring in for-loop
-hold all;
-
- for i=1:12  
-%     plot(X(idx==i,1),X(idx==i,2), '.', 'Color', color(i,:), 'MarkerSize',12);
-%set(gca,'Color',color(i,:))
-    plot3(X(idx==i,1),X(idx==i,2),X(idx==i,3),'.','MarkerFaceColor',color(i,:))
- end
- plot3(ctrs(:,1),ctrs(:,2),ctrs(:,3),'*','MarkerFaceColor','black','MarkerSize',8);
+% figure(1);
+% clf;
+% color = hsv(12);                                % generate colormap for iterative coloring in for-loop
+% hold all;
+% 
+%  for i=1:12  
+% %     plot(X(idx==i,1),X(idx==i,2), '.', 'Color', color(i,:), 'MarkerSize',12);
+% %set(gca,'Color',color(i,:))
+%     plot3(X(idx==i,1),X(idx==i,2),X(idx==i,3),'.','MarkerFaceColor',color(i,:))
+%  end
+%  plot3(ctrs(:,1),ctrs(:,2),ctrs(:,3),'*','MarkerFaceColor','black','MarkerSize',8);
 
 %plot(ctrs(:,1),ctrs(:,2),'kx','MarkerSize',12,'LineWidth',2);
-hold off;
-grid on;
+% hold off;
+% grid on;
     r=ctrs;
     codebooks{1,p}=r';
 end
 disp('codebooks generated')
 
 %% Automated recognition using prerecorded samples
-mfcc=getMFCC('mmta3',15,'wav');
+mfcc=getMFCC('mw1',15,'wav');
 %dirty removal of NaN column -> to be improved
 if sum(isnan(mfcc(1,:)))>0
 mfcc=mfcc(:,1:length(mfcc(1,:))-1);

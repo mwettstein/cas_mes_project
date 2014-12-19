@@ -43,7 +43,6 @@ else
 end
 % End initialization code - DO NOT EDIT
 
-
 % --- Executes just before WelcomeVoice is made visible.
 function WelcomeVoice_OpeningFcn(hObject, eventdata, handles, varargin)
 % This function has no output args, see OutputFcn.
@@ -65,9 +64,7 @@ if exist('users.mat', 'file') == 2
     load('users.mat');
     allusers = users;
 end;
-
-    
-    
+ 
 % --- Outputs from this function are returned to the command line.
 function varargout = WelcomeVoice_OutputFcn(hObject, eventdata, handles) 
 % varargout  cell array for returning output args (see VARARGOUT);
@@ -104,7 +101,6 @@ function commands_Callback(hObject, eventdata, handles)
 % Hints: get(hObject,'String') returns contents of commands as text
 %        str2double(get(hObject,'String')) returns contents of commands as a double
 
-
 % --- Executes during object creation, after setting all properties.
 function commands_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to commands (see GCBO)
@@ -118,10 +114,11 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 %new
 
-
 % --- Executes on button press in gotoUserAdmin.
 function gotoUserAdmin_Callback(hObject, eventdata, handles)
 % hObject    handle to gotoUserAdmin (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-AddUser;
+global state
+state = 'locked';
+UserAdmin;

@@ -22,7 +22,7 @@ function varargout = UserAdmin(varargin)
 
 % Edit the above text to modify the response to help UserAdmin
 
-% Last Modified by GUIDE v2.5 19-Dec-2014 14:11:16
+% Last Modified by GUIDE v2.5 19-Dec-2014 14:39:39
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -236,3 +236,15 @@ function listbox2_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes when user attempts to close figure1.
+function figure1_CloseRequestFcn(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: delete(hObject) closes the figure
+global state
+state = 'locked';
+delete(hObject);

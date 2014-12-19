@@ -14,11 +14,11 @@ set(0,'DefaultAxesLineStyleOrder','-|-.|--|:');
 
 %% get the data
 % wavename = 'mw3';
-wavename = 'mm1';
+wavename = 'fpta1';
 % wavename = 'yo_this_stuff_is_fresh';
 [y,Fs] = audioread([wavename '.wav']);
 y = y/max(abs(y));                  % normalize audio
-sound(y,Fs);
+% sound(y,Fs);
 % if( max(abs(y))<=1 ), y = y * 2^15; end;
 figure('units','normalized','outerposition',[0 0 1 1], 'PaperPositionMode', 'auto', ... 
               'color', 'w',...% 'PaperOrientation', 'landscape',
@@ -181,8 +181,8 @@ title('Vector quantized squared euclidian distances');
 csvwrite([wavename '_sumd.csv'], sumd);
 
 %% finishing
-saveas(1,[pwd '\' wavename],'png');
-saveas(2,[pwd '\' wavename '_mfc'], 'png');
-saveas(3,[pwd '\' wavename '_VC'],'png');
+% saveas(1,[pwd '\pngs\' wavename],'png');
+% saveas(2,[pwd '\pngs\' wavename '_mfc'], 'png');
+% saveas(3,[pwd '\pngs\' wavename '_VC'],'png');
 
-close all;
+% close all;

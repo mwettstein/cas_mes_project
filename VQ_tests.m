@@ -19,7 +19,10 @@ nrOfMfccCoeffs = 96;                    % number of MFCC filter coefficients. Us
 nrOfKmeansClusters = 24;                % number of Clusters for K-Means algorithm
 distinction_limit = 1.5;                % minimum distance for clear distinction of speakers
 codebookMode = 'kmeans';                % choose codebook generation mode!
-% mode = 'lbg';
+% codebookMode = 'lbg';                 % K-Means works much better!
+
+disp('   Welcome to VoiceActivatedDoor!');
+disp('------------------------------------');
 
 % get Codebooks
 %generate cell with names, abbreviations and placeholders for the actual
@@ -40,7 +43,7 @@ if (strcmp(codebookMode,'lbg'))
     k=12;
     e = .000000001;
     for p=1:3
-        A=getMFCC([codebooks{2,p} '1'],15,'wav');
+        A=getMFCC([codebooks{2,p} '1'],nrOfMfccCoeffs,'wav');
         %dirty removal of NaN column -> to be improved
         if sum(isnan(A(1,:)))>0
         A=A(:,1:length(A(1,:))-1);
@@ -72,7 +75,6 @@ if (strcmp(codebookMode,'lbg'))
          end
         end
     end
-    disp('codebooks generated')
     
 elseif(strcmp(codebookMode,'kmeans'))
     % kmeans
@@ -94,10 +96,10 @@ elseif(strcmp(codebookMode,'kmeans'))
         codebooks{1,p}=r';
     end
 end
-disp('codebooks generated')
+disp('Codebooks generated')
 
 %% Automated recognition using prerecorded samples
-mfcc=getMFCC('mmta3',nrOfMfccCoeffs,'wav');
+mfcc=getMFCC('fpta3',nrOfMfccCoeffs,'wav');
 %dirty removal of NaN column -> to be improved
 if sum(isnan(mfcc(1,:)))>0
 mfcc=mfcc(:,1:length(mfcc(1,:))-1);

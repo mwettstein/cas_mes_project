@@ -14,7 +14,7 @@ set(0,'DefaultAxesLineStyleOrder','-|-.|--|:');
 
 %% get the data
 % wavename = 'mw3';
-wavename = 'fpta1';
+wavename = 'fp1';
 % wavename = 'yo_this_stuff_is_fresh';
 [y,Fs] = audioread([wavename '.wav']);
 y = y/max(abs(y));                  % normalize audio
@@ -111,7 +111,8 @@ ylabel('Amplitude');
 
 
 %% Calculate Mel frequency filter coeffs
-[coeffs, f]= melfiltercoeff(nrOfPoints,Fs,mel2hz,hz2mel);
+[coeffs, f]= melfiltercoeff_old(20,nrOfPoints,Fs,mel2hz,hz2mel);
+% coeffs = melfiltercoeff_old(20,nrOfPoints,Fs,mel2hz,hz2mel);
 subplot(4,2,2)
 plot(f/1000,coeffs);
 title('Mel scaled triangle filterbank');

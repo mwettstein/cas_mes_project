@@ -1,4 +1,4 @@
-function [filename]= getMicSample
+function [recdata]= getMicSample
 fs = 48000;
 depth = 24;
 
@@ -8,15 +8,8 @@ disp('Start speaking.')
 recordblocking(rec, 3);
 disp('End of Recording.');
 %% Extract and plot audio file
-% y = getaudiodata(rec);
-
-% recdata=zeros(length(y),2);
-% recdata(1,2) = fs;
-% recdata(:,1) = y;
-% plot(1/fs*(1:length(recdata)),recdata)
-
-recdata = getaudiodata(rec);
-filename = 'mic';
-%% save audiofile
-audiowrite(['./rsc/' filename '.wav'],recdata,fs)
+y = getaudiodata(rec);
+recdata=zeros(length(y),2);
+recdata(1,2) = fs;
+recdata(:,1) = y;
 % plot(1/fs*(1:length(recdata)),recdata)

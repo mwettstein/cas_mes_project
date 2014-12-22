@@ -68,7 +68,7 @@ sampleMtxW=diag(window)*sampleMtx;
 
 %% plot spectrogram
 subplot(4,2,3)
-spectrogram(y, 256, 250, 256, Fs/1000, 'yaxis');
+spectrogram(y, 256, 250, 512, Fs/1000, 'yaxis');
 axis tight;
 xlabel('Time [ms]');
 ylabel('Frequency [kHz]');

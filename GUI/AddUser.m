@@ -111,7 +111,8 @@ fs = 48000;
 depth = 24;
 iterations = 3;
 name = get(handles.edit1,'string');
-global allusers
+global allusers;
+global nrOfMfccCoeffs;
 rec = audiorecorder(fs,depth,1);
 set(handles.edit1,'string','Start speaking');
 recordblocking(rec, 3);
@@ -125,7 +126,11 @@ newmaxuser = str2double(maxuser) + 1;
 allusers. (['user' int2str(newmaxuser)]).name = name;
 allusers. (['user' int2str(newmaxuser)]).autorisation = get(handles.Autorisation,'Value');
 allusers. (['user' int2str(newmaxuser)]).sample = recdata;
-allusers. (['user' int2str(newmaxuser)]).characteristics = 1:1:14;
+% allusers. (['user' int2str(newmaxuser)]).characteristics =
+% generateCodebook;          % Codebook will be generated separately
+
+generateCodebook('kmeans');
+
 users = allusers;
 save('users.mat','users');
 pause(0.5);

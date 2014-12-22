@@ -59,12 +59,16 @@ guidata(hObject, handles);
 
 % UIWAIT makes WelcomeVoice wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
+addpath('../rsc', '../utilities', '../');
 global allusers; 
+global nrOfMfccCoeffs;
+nrOfMfccCoeffs = 96;
 if exist('users.mat', 'file') == 2 
     load('users.mat');
     allusers = users;
 end;
- 
+generateCodebook('kmeans');
+
 % --- Outputs from this function are returned to the command line.
 function varargout = WelcomeVoice_OutputFcn(hObject, eventdata, handles) 
 % varargout  cell array for returning output args (see VARARGOUT);
@@ -81,6 +85,11 @@ function checkAut_Callback(hObject, eventdata, handles)
 % hObject    handle to checkAut (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+global allusers
+
+% nrOfMfccCoeffs = 128;
+distinction_limit = 1.5;
+
 fs = 48000;
 depth = 24;
 rec = audiorecorder(fs,depth,1);
@@ -90,8 +99,21 @@ recordblocking(rec, 3);
 set(handles.commands, 'String', 'End of Recording')
 %% Extract and plot audio file
 recdata = getaudiodata(rec);
-% subplot(3,1,1)
+recdata = recdata/max(abs(recdata));            % normalize audio
+subplot(3,2,2)
 plot(1/fs*(1:length(recdata)),recdata);
+subplot(3,2,4)
+spectrogram(recdata, 512, 64, 256, fs/1000, 'yaxis');
+axis tight;
+xlabel('Time [ms]');
+ylabel('Frequency [kHz]');
+title('Spectrogram');
+username = searchUser(recdata, allusers, distinction_limit);
+if(strcmp(username, 'error'))
+    set(handles.commands, 'String', 'No user found!');
+else
+    set(handles.commands, 'String', ['User ' username ' recognized']);
+end
 % subplot(3,1,2)
 % spectrogram(recdata, 256, 250, 256, fs/1000, 'yaxis');
 

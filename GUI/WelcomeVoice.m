@@ -84,13 +84,16 @@ function checkAut_Callback(hObject, eventdata, handles)
 fs = 48000;
 depth = 24;
 rec = audiorecorder(fs,depth,1);
-%% Record 1.5 seconds
+%% Record 3 seconds
 set(handles.commands, 'String', 'Start speaking')
 recordblocking(rec, 3);
 set(handles.commands, 'String', 'End of Recording')
 %% Extract and plot audio file
 recdata = getaudiodata(rec);
+% subplot(3,1,1)
 plot(1/fs*(1:length(recdata)),recdata);
+% subplot(3,1,2)
+% spectrogram(recdata, 256, 250, 256, fs/1000, 'yaxis');
 
 
 function commands_Callback(hObject, eventdata, handles)

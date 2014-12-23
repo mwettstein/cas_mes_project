@@ -14,10 +14,11 @@
 clear all; 
 close all; clc; addpath('rsc', 'utilities'); superpack;
 format compact;
+format shortG;
 
-nrOfMfccCoeffs = 96;                    % number of MFCC filter coefficients. Use ~(Fs/16e3)*16
+nrOfMfccCoeffs = 48;                    % number of MFCC filter coefficients. Use ~(Fs/16e3)*16
 nrOfKmeansClusters = 24;                % number of Clusters for K-Means algorithm
-distinction_limit = 1.5;                % minimum distance for clear distinction of speakers
+distinction_limit = 5;                % minimum distance for clear distinction of speakers
 codebookMode = 'kmeans';                % choose codebook generation mode!
 % codebookMode = 'lbg';                 % K-Means works much better!
 
@@ -100,7 +101,7 @@ end
 disp('Codebooks generated')
 
 %% Automated recognition using prerecorded samples
-mfcc=getMFCC('mmta3',nrOfMfccCoeffs,'wav');
+mfcc=getMFCC('mwta1',nrOfMfccCoeffs,'wav');
 %dirty removal of NaN column -> to be improved
 if sum(isnan(mfcc(1,:)))>0
 mfcc=mfcc(:,1:length(mfcc(1,:))-1);
@@ -108,7 +109,7 @@ end
 for p=1:3
     d=euDist(mfcc,codebooks{1,p});
 %     d = pdist2(mfcc(2:nrOfKmeansClusters+1),codebooks{1,p},'euclidean');
-    distance(p)=sum(min(d,[],2))/size(d,1);
+    distance(p)=10^(sum(min(d,[],2))/size(d,1))/1e5;
 end
 distance
 distance_sort = sort(distance,'ascend');
@@ -128,11 +129,11 @@ mfcc=mfcc(:,1:length(mfcc(1,:))-1);
 end
 for p=1:3
     d=euDist(mfcc,codebooks{1,p});
-    distance(p)=(sum(min(d,[],2))/size(d,1));
+    distance(p)=10^(sum(min(d,[],2))/size(d,1))/1e5;
 end
 distance
 distance_sort = sort(distance,'ascend');
-if((distance_sort(2)-distance_sort(1)) <= distinction_limit)
+if(((distance_sort(2)-distance_sort(1)) <= distinction_limit) || (distance_sort(1) >= 12))
     error('No clear distinction possible');
 else
     [~,winner]=min(distance);

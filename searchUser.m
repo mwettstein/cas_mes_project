@@ -1,4 +1,4 @@
-function [username] = searchUser(speechSample, userStruct, distinction_limit)
+function [username] = searchUser(speechSample, userStruct, distinction_limit, plotEnable)
 
 global nrOfMfccCoeffs;
 % distinction_limit = 1.5;
@@ -25,4 +25,15 @@ else
     [~,winner]=min(distance);
     username = userStruct.(cellContent{winner}).name;
     disp(['nearest match: ' userStruct.(cellContent{winner}).name]);
+end
+
+if(plotEnable == 1)
+    [xq,yq] = meshgrid(0:0.05:13, 0:0.05:25);       % generate close-mesh meshgrid for interpolation
+    result_ip = interp2(mfcc,xq,yq);              % interpolate data to close-mesh meshgrid
+    subplot(3,2,6)
+    mesh(result_ip.');
+    view(33, 28);                                   % change POV to AZ 33 EL 28
+    grid on;
+    title('Mel Coefficients');
+    axis tight;
 end

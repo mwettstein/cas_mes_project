@@ -149,12 +149,14 @@ ylabel( 'Cepstrum index' );
 title('Mel frequency cepstrum');
 
 %% Grid-plot of Mel coefficients
-[xq,yq] = meshgrid(0:0.05:13, 0:0.05:25);       % generate close-mesh meshgrid for interpolation
+[xlim ylim] = size(result);
+[xq,yq] = meshgrid(linspace(0, ylim, ylim*30), linspace(0, xlim, xlim*30));
+% [xq,yq] = meshgrid(0:0.05:13, 0:0.05:25);       % generate close-mesh meshgrid for interpolation
 result_ip = interp2(result,xq,yq);              % interpolate data to close-mesh meshgrid
 
 figure(2)
 clf;
-mesh(result_ip.');
+mHandle = mesh(result_ip.');
 view(33, 28);                                   % change POV to AZ 33 EL 28
 grid on;
 title('Mel Coefficients');
@@ -182,7 +184,7 @@ title('Vector quantized squared euclidian distances');
 csvwrite([wavename '_sumd.csv'], sumd);
 
 %% finishing
-saveas(1,[pwd '\pngs\' wavename],'png');
+% saveas(1,[pwd '\pngs\' wavename],'png');
 % saveas(2,[pwd '\pngs\' wavename '_mfc'], 'png');
 % saveas(3,[pwd '\pngs\' wavename '_VC'],'png');
 

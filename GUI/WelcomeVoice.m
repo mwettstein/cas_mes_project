@@ -86,7 +86,7 @@ function checkAut_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 global allusers
-distinction_limit = 5;
+distinction_limit = 15;
 
 fs = 48000;
 depth = 24;

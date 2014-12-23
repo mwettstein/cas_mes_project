@@ -19,7 +19,7 @@ for p=1:nrOfUsers
 end
 distance
 distance_sort = sort(distance,'ascend');
-if(((distance_sort(2)-distance_sort(1)) <= distinction_limit) || (distance_sort(1) >= 12))
+if(((distance_sort(2)-distance_sort(1)) <= distinction_limit) || (sum(distance) <= 300) || (distance_sort(1) >= 100))
     username = 'error';
 else
     [~,winner]=min(distance);
@@ -28,7 +28,8 @@ else
 end
 
 if(plotEnable == 1)
-    [xq,yq] = meshgrid(0:0.05:13, 0:0.05:25);       % generate close-mesh meshgrid for interpolation
+    [xlim, ylim] = size(mfcc);
+    [xq,yq] = meshgrid(linspace(0, ylim, ylim*10), linspace(0, xlim, xlim*10));       % generate close-mesh meshgrid for interpolation
     result_ip = interp2(mfcc,xq,yq);              % interpolate data to close-mesh meshgrid
     subplot(3,2,6)
     mesh(result_ip.');

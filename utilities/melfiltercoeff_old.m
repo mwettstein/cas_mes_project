@@ -1,4 +1,4 @@
-function [coeffs] = melfiltercoeff_old(nrOfTriangles,nrOfFreqPoints,fs,mel2hz, hz2mel)
+function [coeffs, f] = melfiltercoeff_old(nrOfTriangles,nrOfFreqPoints,fs,mel2hz, hz2mel)
 % nrOfTriangles = 20;
 f = linspace(0, fs/2, nrOfFreqPoints);
 %voice frequency range

@@ -22,7 +22,7 @@ function varargout = WelcomeVoice(varargin)
 
 % Edit the above text to modify the response to help WelcomeVoice
 
-% Last Modified by GUIDE v2.5 12-Dec-2014 08:49:21
+% Last Modified by GUIDE v2.5 23-Dec-2014 19:06:57
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -43,7 +43,6 @@ else
 end
 % End initialization code - DO NOT EDIT
 
-
 % --- Executes just before WelcomeVoice is made visible.
 function WelcomeVoice_OpeningFcn(hObject, eventdata, handles, varargin)
 % This function has no output args, see OutputFcn.
@@ -60,12 +59,16 @@ guidata(hObject, handles);
 
 % UIWAIT makes WelcomeVoice wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
+addpath('../rsc', '../utilities', '../');
+global allusers; 
+global nrOfMfccCoeffs;
+nrOfMfccCoeffs = 48;
 if exist('users.mat', 'file') == 2 
     load('users.mat');
+    allusers = users;
 end;
+generateCodebook('kmeans');
 
-    
-    
 % --- Outputs from this function are returned to the command line.
 function varargout = WelcomeVoice_OutputFcn(hObject, eventdata, handles) 
 % varargout  cell array for returning output args (see VARARGOUT);
@@ -82,16 +85,36 @@ function checkAut_Callback(hObject, eventdata, handles)
 % hObject    handle to checkAut (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+global allusers
+distinction_limit = 15;
+
 fs = 48000;
 depth = 24;
 rec = audiorecorder(fs,depth,1);
-%% Record 1.5 seconds
+%% Record 3 seconds
 set(handles.commands, 'String', 'Start speaking')
-recordblocking(rec, 3);
+recordblocking(rec, 1.5);
 set(handles.commands, 'String', 'End of Recording')
 %% Extract and plot audio file
 recdata = getaudiodata(rec);
+% recdata = recdata/max(abs(recdata));            % normalize audio
+subplot(3,2,2)
 plot(1/fs*(1:length(recdata)),recdata);
+axis([0 1.5 -1 1]);
+subplot(3,2,4)
+spectrogram(recdata, 512, 64, 256, fs/1000, 'yaxis');
+axis tight;
+xlabel('Time [ms]');
+ylabel('Frequency [kHz]');
+title('Spectrogram');
+username = searchUser(recdata, allusers, distinction_limit, 1);
+if(strcmp(username, 'error'))
+    set(handles.textBox, 'String', 'No user found!');
+    set(handles.commands, 'String', 'Access denied!', 'BackgroundColor', 'red', 'FontSize', 12, 'FontWeight', 'bold');
+else
+    set(handles.textBox, 'String', [username ' recognized']);
+    set(handles.commands, 'String', 'Access granted!', 'BackgroundColor', 'green', 'FontSize', 12, 'FontWeight', 'bold');
+end
 
 
 function commands_Callback(hObject, eventdata, handles)
@@ -101,7 +124,6 @@ function commands_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of commands as text
 %        str2double(get(hObject,'String')) returns contents of commands as a double
-
 
 % --- Executes during object creation, after setting all properties.
 function commands_CreateFcn(hObject, eventdata, handles)
@@ -116,10 +138,34 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 %new
 
-
 % --- Executes on button press in gotoUserAdmin.
 function gotoUserAdmin_Callback(hObject, eventdata, handles)
 % hObject    handle to gotoUserAdmin (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-AddUser;
+global state
+state = 'locked';
+UserAdmin;
+
+
+
+function edit2_Callback(hObject, eventdata, handles)
+% hObject    handle to edit2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit2 as text
+%        str2double(get(hObject,'String')) returns contents of edit2 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit2_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

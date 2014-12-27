@@ -22,7 +22,7 @@ function varargout = AddUser(varargin)
 
 % Edit the above text to modify the response to help AddUser
 
-% Last Modified by GUIDE v2.5 12-Dec-2014 13:45:12
+% Last Modified by GUIDE v2.5 19-Dec-2014 14:24:01
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -43,7 +43,6 @@ else
 end
 % End initialization code - DO NOT EDIT
 
-
 % --- Executes just before AddUser is made visible.
 function AddUser_OpeningFcn(hObject, eventdata, handles, varargin)
 % This function has no output args, see OutputFcn.
@@ -60,21 +59,7 @@ guidata(hObject, handles);
 
 % UIWAIT makes AddUser wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
-if exist('users.mat', 'file') == 2 
-    load('users.mat');
-else
-    users.user0.name = 'dummy';
-    users.user0.autorisation = false;
-    users.user0.sample = sign(sin(0:0.1:50));
-    users.user0.characteristics = [1,2,3,4,5,6,7,8,9,10,11,12,13,14];
-    save('users.mat','users');
-end;
-
-set(handles.commands, 'String', '-- locked --')
-set(handles.editable, 'String', '')
-
-
-
+set(handles.edit1,'string','Name');
 
 % --- Outputs from this function are returned to the command line.
 function varargout = AddUser_OutputFcn(hObject, eventdata, handles) 
@@ -86,27 +71,18 @@ function varargout = AddUser_OutputFcn(hObject, eventdata, handles)
 % Get default command line output from handles structure
 varargout{1} = handles.output;
 
-
-% --- Executes on button press in enter.
-function enter_Callback(hObject, eventdata, handles)
-% hObject    handle to enter (see GCBO)
+function edit1_Callback(hObject, eventdata, handles)
+% hObject    handle to edit1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-
-
-function commands_Callback(hObject, eventdata, handles)
-% hObject    handle to commands (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of commands as text
-%        str2double(get(hObject,'String')) returns contents of commands as a double
+% Hints: get(hObject,'String') returns contents of edit1 as text
+%        str2double(get(hObject,'String')) returns contents of edit1 as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function commands_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to commands (see GCBO)
+function edit1_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -117,75 +93,48 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- Executes on button press in pushbutton2.
-function pushbutton2_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton2 (see GCBO)
+% --- Executes on button press in Autorisation.
+function Autorisation_Callback(hObject, eventdata, handles)
+% hObject    handle to Autorisation (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+% Hint: get(hObject,'Value') returns toggle state of Autorisation
 
 
-function users_Callback(hObject, eventdata, handles)
-% hObject    handle to users (see GCBO)
+% --- Executes on button press in pushbutton1.
+function pushbutton1_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+fs = 48000;
+depth = 24;
+iterations = 3;
+name = get(handles.edit1,'string');
+global allusers;
+global nrOfMfccCoeffs;
+rec = audiorecorder(fs,depth,1);
+set(handles.edit1,'string','Start speaking');
+recordblocking(rec, 3);
+set(handles.edit1,'string','End of Recording');
+recdata = getaudiodata(rec);
+fields = fieldnames(allusers);
+fieldsend = fields(end);
+maxuser = strrep(fieldsend,'user','');
+newmaxuser = str2double(maxuser) + 1;
 
-% Hints: get(hObject,'String') returns contents of users as text
-%        str2double(get(hObject,'String')) returns contents of users as a double
+allusers. (['user' int2str(newmaxuser)]).name = name;
+allusers. (['user' int2str(newmaxuser)]).autorisation = get(handles.Autorisation,'Value');
+allusers. (['user' int2str(newmaxuser)]).sample = recdata;
+% allusers. (['user' int2str(newmaxuser)]).characteristics =
+% generateCodebook;          % Codebook will be generated separately
 
+generateCodebook('kmeans');
 
-% --- Executes during object creation, after setting all properties.
-function users_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to users (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function editable_Callback(hObject, eventdata, handles)
-% hObject    handle to editable (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of editable as text
-%        str2double(get(hObject,'String')) returns contents of editable as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function editable_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to editable (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in delUser.
-function delUser_Callback(hObject, eventdata, handles)
-% hObject    handle to delUser (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes on button press in addUser.
-function addUser_Callback(hObject, eventdata, handles)
-% hObject    handle to addUser (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes on button press in AudioIdent.
-function AudioIdent_Callback(hObject, eventdata, handles)
-% hObject    handle to AudioIdent (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+users = allusers;
+save('users.mat','users');
+pause(0.5);
+set(handles.edit1,'string','User stored');
+pause(0.5);
+close AddUser
+UserAdmin

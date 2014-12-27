@@ -92,9 +92,9 @@ fs = 48000;
 depth = 24;
 rec = audiorecorder(fs,depth,1);
 %% Record 3 seconds
-set(handles.textBox, 'String', 'Start speaking')
+set(handles.commands, 'String', 'Start speaking')
 recordblocking(rec, 1.5);
-set(handles.textBox, 'String', 'End of Recording')
+set(handles.commands, 'String', 'End of Recording')
 %% Extract and plot audio file
 recdata = getaudiodata(rec);
 % recdata = recdata/max(abs(recdata));            % normalize audio

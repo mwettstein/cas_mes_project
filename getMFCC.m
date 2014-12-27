@@ -7,9 +7,13 @@ if strcmp(mode,'wav')
  %   if( max(abs(y))<=1 ), y = y * 2^15; end; 
 elseif strcmp(mode,'vect')
     y=wavname(:,1);
-    Fs=wavname(1,2); %default
-    plot(1/Fs*(1:length(wavname(:,1))),wavname(:,1))
-    sound(wavname(:,1),wavname(1,2));
+    if length(wavname(1,:)) == 2
+        Fs=wavname(1,2); %default
+    else
+        Fs=48000; %how to deal with different formates?
+    end
+    %plot(1/Fs*(1:length(y)),y)
+    %sound(y,Fs);
 else
     error('wrong mode selected')
 end 

@@ -12,4 +12,4 @@ y = getaudiodata(rec);
 recdata=zeros(length(y),2);
 recdata(1,2) = fs;
 recdata(:,1) = y;
-plot(1/fs*(1:length(recdata)),recdata)
+% plot(1/fs*(1:length(recdata)),recdata)

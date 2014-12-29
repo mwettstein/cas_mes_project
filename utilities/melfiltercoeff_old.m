@@ -16,3 +16,4 @@ for i = 1:nrOfTriangles
         fPos = f>=cutoffs(i+1)&f<=cutoffs(i+2); % falling slope: find cutoff frequency points
         coeffs(i,fPos) = (cutoffs(i+2)-f(fPos))/(cutoffs(i+2)-cutoffs(i+1));
 end
+plot(coeffs)

@@ -2,7 +2,7 @@ function [coeffs, f] = melfiltercoeff_old(nrOfTriangles,nrOfFreqPoints,fs,mel2hz
 % nrOfTriangles = 20;
 f = linspace(0, fs/2, nrOfFreqPoints);
 %voice frequency range
-f_low= 100;
+f_low= 300;
 f_high=4000; 
 
 %filter cutoff frequencies (Hz) for all filters, size 1x(M+2)

@@ -62,7 +62,7 @@ guidata(hObject, handles);
 addpath('../rsc', '../utilities', '../');
 global allusers; 
 global nrOfMfccCoeffs;
-nrOfMfccCoeffs = 48;
+nrOfMfccCoeffs = 100;
 if exist('users.mat', 'file') == 2 
     load('users.mat');
     allusers = users;

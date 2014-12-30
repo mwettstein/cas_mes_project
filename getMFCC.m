@@ -31,7 +31,7 @@ end
 % end
 
 %% alternative division into overlapping blocks
-blockLength = 20e-3;  %to be adjusted
+blockLength = 35e-3;  %to be adjusted
 overlapLength = 10e-3;
 speechLength = (length(yf)*1/Fs);  
 nrOfBlocks = floor(speechLength/(blockLength-overlapLength));
@@ -49,14 +49,12 @@ window=hamming(length(sampleMtx(:,1)));
 sampleMtxW=diag(window)*sampleMtx;
 
 %% DFT for each block
-nrOfPoints = 2^nextpow2(length(sampleMtxW(:,1)));
+% nrOfPoints = 2^nextpow2(length(sampleMtxW(:,1)));
 % fft_temp = (abs(fft(sampleMtxW,nrOfPoints))).^2;
 % sampleMtxFFT = fft_temp(1:nrOfPoints/2+1,:);
 % nrOfPoints=nrOfPoints/2+1;
 % for i = 1:length(sampleMtxW(1,:))
-fft_temp = fft(sampleMtxW, nrOfPoints);
-nrOfPoints = nrOfPoints/2+1;
-sampleMtxFFT = fft_temp(1:nrOfPoints,:);
+    sampleMtxFFT = fft(sampleMtxW);
 % end
 %% Calculate Mel frequency filter coeffs
 
@@ -64,15 +62,15 @@ sampleMtxFFT = fft_temp(1:nrOfPoints,:);
 coeffs = melfiltercoeff_old(nrOfCoeffs, length(sampleMtxFFT)-1, Fs, mel2hz, hz2mel);
 % plot(linspace(0, (Fs/2), length(coeffs)), coeffs'),
 %% Filter Spectra with Filterbank
-sampleMtxFFTMel=coeffs * abs(sampleMtxFFT(1:length(sampleMtxFFT)-1, :));
+sampleMtxFFTMel=coeffs * abs(sampleMtxFFT(1:length(sampleMtxFFT)-1, :)).^2;
 
 %% Take the Log
 sampleMtxFFTMelLog=log(sampleMtxFFTMel);
 
 %% DCT - Discrete Cosine Transform                       
-% nrOfMelCoeffs=nrOfCoeffs;  
-% MtxDCT=dctm(nrOfMelCoeffs,300)';
-% mfcc =  MtxDCT * (sampleMtxFFTMelLog);
-mfcc= dct(sampleMtxFFTMelLog);
+%nrOfMelCoeffs=nrOfCoeffs;  
+%MtxDCT=dctm(nrOfMelCoeffs,20);
+%temp =  MtxDCT * (sampleMtxFFTMelLog);
+mfcc= dct((sampleMtxFFTMelLog));
 mfcc=mfcc(2:nrOfCoeffs,:);
 

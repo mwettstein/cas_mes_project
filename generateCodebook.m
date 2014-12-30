@@ -9,7 +9,7 @@ function [codebook] = generateCodebook(codebookMode)
 global allusers;
 global nrOfMfccCoeffs;                    % number of MFCC filter coefficients. Use ~(Fs/16e3)*16
 
-nrOfKmeansClusters = 24;                % number of Clusters for K-Means algorithm
+nrOfKmeansClusters = 59;                % number of Clusters for K-Means algorithm
 
 cellContent = fieldnames(allusers);
 nrOfUsers = length(cellContent);

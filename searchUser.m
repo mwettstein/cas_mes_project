@@ -15,11 +15,12 @@ if sum(isnan(mfcc(1,:)))>0
 end
 for p=1:nrOfUsers
     d=euDist(mfcc,userStruct.(cellContent{p}).characteristics);
-    distance(p)=10^(sum(min(d,[],2))/size(d,1))/1e5;
+    distance(p)=(sum(min(d,[],2))/size(d,1));
 end
 distance
 distance_sort = sort(distance,'ascend');
-if(((distance_sort(2)-distance_sort(1)) <= distinction_limit) || (sum(distance) <= 300) || (distance_sort(1) >= 100))
+% if(((distance_sort(2)-distance_sort(1)) <= distinction_limit) || (sum(distance) <= 300) || (distance_sort(1) >= 100))
+if((distance_sort(2)-distance_sort(1)) <= distinction_limit)
     username = 'error';
 else
     [~,winner]=min(distance);

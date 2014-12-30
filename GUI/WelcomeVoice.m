@@ -62,7 +62,7 @@ guidata(hObject, handles);
 addpath('../rsc', '../utilities', '../');
 global allusers; 
 global nrOfMfccCoeffs;
-nrOfMfccCoeffs = 100;
+nrOfMfccCoeffs = 100;             % 100
 if exist('users.mat', 'file') == 2 
     load('users.mat');
     allusers = users;
@@ -86,15 +86,15 @@ function checkAut_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 global allusers
-distinction_limit = 15;
+distinction_limit = 1.5;
 
 fs = 48000;
 depth = 24;
 rec = audiorecorder(fs,depth,1);
 %% Record 3 seconds
-set(handles.commands, 'String', 'Start speaking')
+set(handles.textBox, 'String', 'Start speaking')
 recordblocking(rec, 1.5);
-set(handles.commands, 'String', 'End of Recording')
+set(handles.textBox, 'String', 'End of Recording')
 %% Extract and plot audio file
 recdata = getaudiodata(rec);
 % recdata = recdata/max(abs(recdata));            % normalize audio

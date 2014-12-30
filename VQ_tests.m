@@ -15,8 +15,8 @@ clear all;
 close all; clc; addpath('rsc', 'utilities'); superpack;
 format compact;
 
-nrOfMfccCoeffs = 64;                    % number of MFCC filter coefficients. Use ~(Fs/16e3)*16
-nrOfKmeansClusters = 50;                % number of Clusters for K-Means algorithm
+nrOfMfccCoeffs = 100;                    % number of MFCC filter coefficients. Use ~(Fs/16e3)*16
+nrOfKmeansClusters = 59;                % number of Clusters for K-Means algorithm
 distinction_limit = 1.5;                % minimum distance for clear distinction of speakers
 codebookMode = 'kmeans';                % choose codebook generation mode!
 %codebookMode = 'lbg';                 % K-Means works much better!
@@ -94,17 +94,18 @@ elseif(strcmp(codebookMode,'kmeans'))
         X=A';
         nc=size(X,2);
         [x,esq,j]=kmeans(X,1);
-        m=1;    
-        while m<k
-            n=min(m,k-m);
-            m=m+n;
-            e=1e-4*sqrt(esq)*rand(nc,1);
-            opts = statset('Display','off');
-            [x,esq,j]=kmeans(X,m,'Distance', 'sqEuclidean', 'Replicates', 25, 'options', opts); 
-             %x(n+1:m-n,:)]);
-        end
+        m=k;    
+%         while m<k
+%             n=min(m,k-m);
+%             m=m+n;
+%        %     e=1e-4*sqrt(esq)*rand(nc,1);
+%             opts = statset('Display','off');
+%             [x,esq,j]=kmeans(X,m,'Distance', 'sqEuclidean', 'Replicates', 25, 'options', opts); 
+%             %x(n+1:m-n,:)]);
+%         end
         
-        
+         opts = statset('Display','off');
+        [x,esq,j]=kmeans(X,m,'Distance', 'sqEuclidean', 'Replicates', 25, 'options', opts); 
 %         X=A';
 %         opts = statset('Display','off');
 %         warning('off','all');
@@ -116,7 +117,7 @@ end
 disp('Codebooks generated')
 
 %% Automated recognition using prerecorded samples
-mfcc=getMFCC('lvta1',nrOfMfccCoeffs,'wav');
+mfcc=getMFCC('fpta3',nrOfMfccCoeffs,'wav');
 %dirty removal of NaN column -> to be improved
 if sum(isnan(mfcc(1,:)))>0
 mfcc=mfcc(:,1:length(mfcc(1,:))-1);
@@ -173,3 +174,6 @@ else
     [~,winner]=min(distance);
     disp(['nearest match: ' codebooks{3,winner}]);
 end
+%% Parameter optimization using fminsearch
+[x, fval]= fminsearch(@(x) param_eval(x),[100 59],optimset('TolX',0.5,'maxIter',1e6));
+%[x, fval]= fminsearch(@(x) param_eval(x),[61 53]);

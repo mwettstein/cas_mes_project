@@ -9,10 +9,12 @@ cellContent = fieldnames(userStruct);
 nrOfUsers = length(cellContent);
 
 mfcc=getMFCC(speechSample,nrOfMfccCoeffs,'vect');
-%dirty removal of NaN column -> to be improved
-if sum(isnan(mfcc(1,:)))>0
-    mfcc=mfcc(:,1:length(mfcc(1,:))-1);
-end
+% %dirty removal of NaN column -> to be improved
+% if sum(isnan(mfcc(1,:)))>0
+%     mfcc=mfcc(:,1:length(mfcc(1,:))-1);
+% end
+mfcc = mfcc(:,isfinite(mfcc(1,:))); %Renoves every column that contains a NaN et the first row
+
 for p=1:nrOfUsers
     d=euDist(mfcc,userStruct.(cellContent{p}).characteristics);
     distance(p)=(sum(min(d,[],2))/size(d,1));

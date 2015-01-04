@@ -114,6 +114,7 @@ if(strcmp(username, 'error'))
 else
     set(handles.textBox, 'String', [username ' recognized']);
     set(handles.commands, 'String', 'Access granted!', 'BackgroundColor', 'green', 'FontSize', 12, 'FontWeight', 'bold');
+%     serialEval('run',21,'ack');
 end
 
 

@@ -1,5 +1,5 @@
 %%
-function [ success, answer ] = serial_eval(command, port, response)
+function [ success, answer ] = serialEval(command, port, response)
 
 timeout = 50;
 

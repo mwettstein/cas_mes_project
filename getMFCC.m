@@ -12,6 +12,8 @@ else
     error('wrong mode selected')
 end 
 
+% y = y/max(abs(y));                  % normalize audio sample
+
 %% pre-emphasize filter (Highpass) -> spectrally flatten the speech signal
   B = [1 -0.97];
 %  M = filter(B,1,M);
@@ -30,7 +32,7 @@ end
 % end
 
 %% alternative division into overlapping blocks
-blockLength = 25e-3;  %to be adjusted
+blockLength = 20e-3;  %to be adjusted
 overlapLength = 10e-3;
 speechLength = (length(yf)*1/Fs);  
 nrOfBlocks = floor(speechLength/(blockLength-overlapLength));
@@ -48,12 +50,13 @@ window=hamming(length(sampleMtx(:,1)));
 sampleMtxW=diag(window)*sampleMtx;
 
 %% DFT for each block
-% nrOfPoints = 2^nextpow2(length(sampleMtxW(:,1)));
+NFFT = 2^nextpow2(length(sampleMtxW(:,1)));
 % fft_temp = (abs(fft(sampleMtxW,nrOfPoints))).^2;
 % sampleMtxFFT = fft_temp(1:nrOfPoints/2+1,:);
 % nrOfPoints=nrOfPoints/2+1;
 % for i = 1:length(sampleMtxW(1,:))
-    sampleMtxFFT = fft(sampleMtxW);
+    fft_temp = fft(sampleMtxW, NFFT);
+    sampleMtxFFT = fft_temp(1:NFFT/2+1);
 % end
 %% Calculate Mel frequency filter coeffs
 

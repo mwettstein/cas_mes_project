@@ -1,22 +1,22 @@
 %--------------------------------------------------------------------------
-% __     _____    _____         _       
-%  \ \   / / _ \  |_   _|__  ___| |_ ___ 
+% __     _____    _____         _
+%  \ \   / / _ \  |_   _|__  ___| |_ ___
 %   \ \ / / | | |   | |/ _ \/ __| __/ __|
 %    \ V /| |_| |   | |  __/\__ \ |_\__ \
 %     \_/  \__\_\   |_|\___||___/\__|___/
-%                                      
+%
 %--------------------------------------------------------------------------
 %pattern recognition using Vector quantization
-%Each region is called a cluster and can be represented by its center 
-%set(0,'DefaultAxesLineStyleOrder','-|-.|--|:')called a codeword. 
+%Each region is called a cluster and can be represented by its center
+%set(0,'DefaultAxesLineStyleOrder','-|-.|--|:')called a codeword.
 %Thecollection of all codewords is called a codebook
 %vdqtool
-clear all; 
+clear all;
 close all; clc; addpath('rsc', 'utilities'); superpack;
 format compact;
 
-nrOfMfccCoeffs = 96;                    % number of MFCC filter coefficients. Use ~(Fs/16e3)*16
-nrOfKmeansClusters = 24;                % number of Clusters for K-Means algorithm
+nrOfMfccCoeffs = 24;                    % number of MFCC filter coefficients. Use ~(Fs/16e3)*16
+nrOfKmeansClusters = 12;                % number of Clusters for K-Means algorithm
 distinction_limit = 1.5;                % minimum distance for clear distinction of speakers
 codebookMode = 'kmeans';                % choose codebook generation mode!
 % codebookMode = 'lbg';                 % K-Means works much better!
@@ -26,8 +26,9 @@ disp('------------------------------------');
 
 % get Codebooks
 %generate cell with names, abbreviations and placeholders for the actual
-%codebook (Rows: 1-> codebook 2-> abbreviation 3-> Full name 
+%codebook (Rows: 1-> codebook 2-> abbreviation 3-> Full name
 %Columns: person):
+
 codebooks=cell(3,3);
 codebooks{3,1}='Fabian Pfäffli';
 codebooks{2,1}='fpta';
@@ -46,7 +47,7 @@ if (strcmp(codebookMode,'lbg'))
         A=getMFCC([codebooks{2,p} '1'],nrOfMfccCoeffs,'wav');
         %dirty removal of NaN column -> to be improved
         if sum(isnan(A(1,:)))>0
-        A=A(:,1:length(A(1,:))-1);
+            A=A(:,1:length(A(1,:))-1);
         end
         d=A;
         %VQ - Vector quantization using LBG Algorithm
@@ -54,26 +55,27 @@ if (strcmp(codebookMode,'lbg'))
         tic
         dpr = 1e8;
         for i = 1:log2(k)
-         r = [r*(1+e), r*(1-e)]; % double the size of the current codebook by splitting each current codebook accordingly
-          while (true) % do while-loop
-             z = euDist(d, r);
-             [m,ind] = min(z, [], 2);
-             t = 0;
-             for j = 1:2^i
-                 r(:, j) = mean(d(:, find(ind == j)), 2);
-                 x = euDist(d(:, find(ind == j)), r(:, j));
-                 for q = 1:length(x)
-                     t = t + x(q);
-                 end
-             end
-             if (((dpr - t)/t) < e)
-                 codebooks{1,p}=r;
-                 break; % while part of the do-while loop
+            r = [r*(1+e), r*(1-e)]; % double the size of the current codebook by splitting each current codebook accordingly
+            while (true) % do while-loop
+                z = euDist(d, r);
+                [m,ind] = min(z, [], 2);
+                t = 0;
+                for j = 1:2^i
+                    r(:, j) = mean(d(:, find(ind == j)), 2);
+                    x = euDist(d(:, find(ind == j)), r(:, j));
+                    for q = 1:length(x)
+                        t = t + x(q);
+                    end
+                end
+                if (((dpr - t)/t) < e)
+                    codebooks{1,p}=r;
+                    break; % while part of the do-while loop
                 else
                     dpr = t;
-             end
-         end
+                end
+            end
         end
+        disp('Codebooks generated')
     end
     
 elseif(strcmp(codebookMode,'kmeans'))
@@ -92,20 +94,25 @@ elseif(strcmp(codebookMode,'kmeans'))
         opts = statset('Display','off');
         warning('off','all');
         [idx,ctrs,sumd,D] = kmeans(X, nrOfKmeansClusters, 'Distance', 'sqEuclidean', 'Replicates', 25, 'options', opts);
+        %         [idx,ctrs,sumd] = kmedoids(X, nrOfKmeansClusters, 25);
         r=ctrs;
         codebooks{1,p}=r';
     end
+    disp('Codebooks generated')
+else
+    error('no valid codebook generation method chosen!');
+    return;
 end
-disp('Codebooks generated')
 
 %% Automated recognition using prerecorded samples
-mfcc=getMFCC('fpta3',nrOfMfccCoeffs,'wav');
+mfcc=getMFCC('fpta1',nrOfMfccCoeffs,'wav');
 %dirty removal of NaN column -> to be improved
 if sum(isnan(mfcc(1,:)))>0
-mfcc=mfcc(:,1:length(mfcc(1,:))-1);
+    mfcc=mfcc(:,1:length(mfcc(1,:))-1);
 end
 for p=1:3
     d=euDist(mfcc,codebooks{1,p});
+    %     d = pdist2(mfcc(2:nrOfKmeansClusters+1),codebooks{1,p},'euclidean');
     distance(p)=sum(min(d,[],2))/size(d,1);
 end
 distance
@@ -122,11 +129,11 @@ end
 mfcc=getMFCC(getMicSample,nrOfMfccCoeffs,'vect');
 %dirty removal of NaN column -> to be improved
 if sum(isnan(mfcc(1,:)))>0
-mfcc=mfcc(:,1:length(mfcc(1,:))-1);
+    mfcc=mfcc(:,1:length(mfcc(1,:))-1);
 end
 for p=1:3
     d=euDist(mfcc,codebooks{1,p});
-    distance(p)=sum(min(d,[],2))/size(d,1);
+    distance(p)=10^((sum(min(d,[],2))/size(d,1))/10);
 end
 distance
 distance_sort = sort(distance,'ascend');

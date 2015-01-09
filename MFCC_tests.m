@@ -14,8 +14,10 @@ set(0,'DefaultAxesLineStyleOrder','-|-.|--|:');
 
 %% get the data
 % wavename = 'mw3';
-wavename = 'fp1';
+wavename = 'fpta1';
 % wavename = 'yo_this_stuff_is_fresh';
+nrOfMelCoeffs = 24;
+
 [y,Fs] = audioread([wavename '.wav']);
 y = y/max(abs(y));                  % normalize audio
 % sound(y,Fs);
@@ -49,7 +51,7 @@ axis tight;
 % end
 
 %% alternative division into overlapping blocks
-blockLength = 25e-3;  %to be adjusted
+blockLength = 20e-3;  %to be adjusted
 overlapLength = 10e-3;
 speechLength = (length(yf)*1/Fs);  
 nrOfBlocks = floor(speechLength/(blockLength-overlapLength));
@@ -95,13 +97,15 @@ nrOfPoints = 2^nextpow2(length(sampleMtxW(:,1)));
 %     sampleMtxFFT(:,i) = fft_temp(1:nrOfPoints/2+1);
 % end
 % nrOfPoints=nrOfPoints/2+1; % only one-sided spectrum is used
-fft_temp = abs(fft(sampleMtxW,nrOfPoints));
+% fft_temp = abs(fft(sampleMtxW,nrOfPoints));
+% nrOfPoints=nrOfPoints/2+1;
+fft_temp = fft(sampleMtxW,nrOfPoints);
 nrOfPoints=nrOfPoints/2+1;
 sampleMtxFFT = fft_temp(1:nrOfPoints,:);
 
 subplot(4,2,7)
 % plot(linspace(0,Fs/2,nrOfPoints)/1000, sampleMtxFFT(:,1:10:65));%linspace(0,Fs/2,nrOfPoints),
-semilogy(linspace(0,Fs/2,nrOfPoints)/1000, sampleMtxFFT(:,1:10:65));%linspace(0,Fs/2,nrOfPoints),
+semilogy(linspace(0,Fs/2,nrOfPoints)/1000, abs(sampleMtxFFT(:,1:10:65)));%linspace(0,Fs/2,nrOfPoints),
 grid on;
 title('Single sided spectra of input Samples (excerpt)');
 axis tight;
@@ -111,7 +115,7 @@ ylabel('Amplitude');
 
 
 %% Calculate Mel frequency filter coeffs
-[coeffs, f]= melfiltercoeff_old(20,nrOfPoints,Fs,mel2hz,hz2mel);
+[coeffs, f]= melfiltercoeff_old(nrOfMelCoeffs,length(sampleMtxFFT)-1,Fs,mel2hz,hz2mel);
 % coeffs = melfiltercoeff_old(20,nrOfPoints,Fs,mel2hz,hz2mel);
 subplot(4,2,2)
 plot(f/1000,coeffs);
@@ -121,7 +125,7 @@ xlabel('Frequency [kHz]');
 ylabel('Factor');
 
 %% Filter Spectra with Filterbank
-sampleMtxFFTMel=coeffs * sampleMtxFFT;
+sampleMtxFFTMel=coeffs * abs(sampleMtxFFT(1:length(sampleMtxFFT)-1, :)).^2;
 subplot(4,2,4)
 plot(sampleMtxFFTMel);
 xlabel( '"Triangle" index' ); 
@@ -137,13 +141,12 @@ ylabel( 'log scaled energy' );
 title( 'log scaled filterbank energies');
 
 %% DCT - Discrete Cosine Transform                       
-nrOfMelCoeffs=14;  
-MtxDCT=dctm(nrOfMelCoeffs,20);
-temp =  MtxDCT * (sampleMtxFFTMelLog);
-% temp = dct(log(sampleMtxFFTMel),nrOfMelCoeffs)
-result = temp(2:14,:);
+% MtxDCT=dctm(nrOfMelCoeffs,20);
+% temp =  MtxDCT * (sampleMtxFFTMelLog);
+temp = dct(sampleMtxFFTMelLog);
+result = temp(2:nrOfMelCoeffs,:);
 subplot(4,2,8)
-imagesc( 1/Fs*(1:(length(y))), [2:14], result ); 
+imagesc( 1/Fs*(1:(length(y))), [2:nrOfMelCoeffs], result ); 
 xlabel( 'Time [s]' ); 
 ylabel( 'Cepstrum index' );
 title('Mel frequency cepstrum');
@@ -161,9 +164,10 @@ title('Mel Coefficients');
 axis tight;
 
 %% Vector Quantisation
+rng(1);
 result_transp = result';                        % from here on, work with transposed matrix
 opts = statset('Display','off');
-[idx,ctrs1,sumd,D] = kmeans(result_transp, 13, 'Distance', 'sqEuclidean', 'Replicates', 150, 'options', opts);
+[idx,ctrs1,sumd,D] = kmeans(result_transp, 12, 'Distance', 'sqEuclidean', 'Replicates', 25, 'options', opts);
 
 figure(3);
 clf;
@@ -177,7 +181,7 @@ end
 plot(ctrs1(:,1),ctrs1(:,2),'kx','MarkerSize',12,'LineWidth',2);
 hold off;
 grid on;
-axis([-5 5 -2 4]);
+% axis([-5 5 -2 4]);
 title('Vector quantized squared euclidian distances');
 csvwrite([wavename '_sumd.csv'], sumd);
 

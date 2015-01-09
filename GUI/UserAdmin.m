@@ -214,7 +214,37 @@ function AudioIdent_Callback(hObject, eventdata, handles)
 % hObject    handle to AudioIdent (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+global allusers;
+global state;
+distinction_limit = 1.5;
 
+fs = 48000;
+depth = 24;
+rec = audiorecorder(fs,depth,1);
+
+% Record 3 seconds
+set(handles.text2, 'String', 'Start speaking')
+recordblocking(rec, 1.5);
+set(handles.text2, 'String', 'End of Recording')
+
+% Extract and plot audio file
+recdata = getaudiodata(rec);
+username = searchUser(recdata, allusers, distinction_limit, 0);
+if(strcmp(username, 'error'))
+    set(handles.text2, 'String', 'No user found!');
+else
+    set(handles.text2, 'String', [username ' recognized']);
+    set(handles.commands, 'String', '++ unlocked ++')
+    state = 'unlocked';
+    set(handles.editable,'string','');
+    
+    fields = fieldnames(allusers);
+    outstring = '';
+    for i=1:numel(fields)
+        outstring = strvcat(outstring, allusers.(fields{i}).name);
+    end
+    set(handles.listbox2,'String',outstring);
+end
 
 % --- Executes on selection change in listbox2.
 function listbox2_Callback(hObject, eventdata, handles)

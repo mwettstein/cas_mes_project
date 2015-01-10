@@ -23,8 +23,8 @@ for p=1:nrOfUsers
 end
 distance
 distance_sort = sort(distance,'ascend');
-if(((distance_sort(2)-distance_sort(1)) <= distinction_limit) || (sum(distance) <= 300) || (distance_sort(1) >= 100))
-% if((distance_sort(2)-distance_sort(1)) <= distinction_limit)
+% if(((distance_sort(2)-distance_sort(1)) <= distinction_limit) || (sum(distance) <= 300) || (distance_sort(1) >= 100))
+if((((distance_sort(2)/distance_sort(1)) <= 2) || (distance_sort(2)-distance_sort(1) <= distinction_limit)) || (sum(distance) <= 300) || (distance_sort(1) >= 100))
     username = 'error';
 else
     [~,winner]=min(distance);
@@ -46,7 +46,6 @@ if(plotEnable == 1)
     axis tight;
     set(gca,'XLim', [0 1000]);
     set(gca,'YLim', [0 600]);
-%     set(gca,'ZLim', [-50 50]);
     set(gca,'XTick', [200, 400, 600, 800, 1000]);
     set(gca,'XTickLabel', num2str([20; 40; 60; 80; 100]));
     set(gca,'YTick', [150, 300, 450, 600]);

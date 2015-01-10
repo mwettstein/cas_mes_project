@@ -67,9 +67,9 @@ if exist('users.mat', 'file') == 2
     load('users.mat');
     allusers = users;
 end;
-generateCodebook('kmeans');
-users = allusers;
-save('users.mat','users');
+% generateCodebook('kmeans');
+% users = allusers;
+% save('users.mat','users');
 
 % --- Outputs from this function are returned to the command line.
 function varargout = WelcomeVoice_OutputFcn(hObject, eventdata, handles) 
@@ -106,6 +106,12 @@ xlabel('Time [s]');
 ylabel('Amplitude');
 title('Speech Signal');
 axis([0 1.5 -1 1]);
+
+if(max(abs(recdata)) <= 0.2)
+    set(handles.commands, 'String', 'Please speak up!', 'BackgroundColor', 'red', 'FontSize', 24, 'FontWeight', 'bold');
+    return;
+end
+
 subplot(3,2,4)
 spectrogram(recdata, 512, 64, 256, fs/1000, 'yaxis');
 axis tight;

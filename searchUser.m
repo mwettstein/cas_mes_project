@@ -35,9 +35,17 @@ if(plotEnable == 1)
     [xq,yq] = meshgrid(linspace(0, ylim, ylim*10), linspace(0, xlim, xlim*10));       % generate close-mesh meshgrid for interpolation
     result_ip = interp2(mfcc,xq,yq);              % interpolate data to close-mesh meshgrid
     subplot(3,2,6)
-    mesh(result_ip.');
+    h = mesh(result_ip.');
+    %get(gca,'XTickLabel', {'25', '50', '75', '100'});
     view(33, 28);                                   % change POV to AZ 33 EL 28
     grid on;
     title('Mel Coefficients');
     axis tight;
+    set(gca,'XTick', [200, 400, 600, 800, 1000]);
+    set(gca,'XTickLabel', num2str([20; 40; 60; 80; 100]));
+    set(gca,'YTick', [150, 300, 450, 600]);
+    set(gca,'YTickLabel', num2str([15; 30; 45; 60]));
+    set(get(gca,'XLabel'),'String','Mel Coefficients');
+    set(get(gca,'YLabel'),'String','Blocks');
+    set(get(gca,'ZLabel'),'String','Amplitude');
 end

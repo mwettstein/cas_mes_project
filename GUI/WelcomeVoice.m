@@ -109,6 +109,10 @@ axis([0 1.5 -1 1]);
 
 if(max(abs(recdata)) <= 0.2)
     set(handles.commands, 'String', 'Please speak up!', 'BackgroundColor', 'red', 'FontSize', 24, 'FontWeight', 'bold');
+    subplot(3,2,4)
+    plot(NaN);
+    subplot(3,2,6)
+    plot(NaN);
     return;
 end
 

@@ -3,7 +3,7 @@ function [ success, answer ] = serialEval(command, port, response)
 
 timeout = 50;
 
-s = serial(port,'BaudRate', 115200, 'Terminator', 'CR/LF');
+s = serial(['COM' num2str(port)],'BaudRate', 115200, 'Terminator', 'CR/LF');
 fopen(s);
 
 fprintf(s,command);

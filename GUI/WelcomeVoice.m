@@ -68,6 +68,8 @@ if exist('users.mat', 'file') == 2
     allusers = users;
 end;
 generateCodebook('kmeans');
+users = allusers;
+save('users.mat','users');
 
 % --- Outputs from this function are returned to the command line.
 function varargout = WelcomeVoice_OutputFcn(hObject, eventdata, handles) 
@@ -86,7 +88,7 @@ function checkAut_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 global allusers
-distinction_limit = 1.5;
+distinction_limit = 15;
 
 fs = 48000;
 depth = 24;
@@ -100,6 +102,9 @@ recdata = getaudiodata(rec);
 % recdata = recdata/max(abs(recdata));            % normalize audio
 subplot(3,2,2)
 plot(1/fs*(1:length(recdata)),recdata);
+xlabel('Time [s]');
+ylabel('Amplitude');
+title('Speech Signal');
 axis([0 1.5 -1 1]);
 subplot(3,2,4)
 spectrogram(recdata, 512, 64, 256, fs/1000, 'yaxis');
@@ -107,14 +112,17 @@ axis tight;
 xlabel('Time [ms]');
 ylabel('Frequency [kHz]');
 title('Spectrogram');
-username = searchUser(recdata, allusers, distinction_limit, 1);
+[username, auth] = searchUser(recdata, allusers, distinction_limit, 1);
 if(strcmp(username, 'error'))
     set(handles.textBox, 'String', 'No user found!');
-    set(handles.commands, 'String', 'Access denied!', 'BackgroundColor', 'red', 'FontSize', 12, 'FontWeight', 'bold');
+    set(handles.commands, 'String', 'Access denied!', 'BackgroundColor', 'red', 'FontSize', 24, 'FontWeight', 'bold');
+elseif(auth == 0)
+    set(handles.textBox, 'String', [username ' recognized']);
+    set(handles.commands, 'String', 'Access denied!', 'BackgroundColor', 'red', 'FontSize', 24, 'FontWeight', 'bold');
 else
     set(handles.textBox, 'String', [username ' recognized']);
-    set(handles.commands, 'String', 'Access granted!', 'BackgroundColor', 'green', 'FontSize', 12, 'FontWeight', 'bold');
-%     serialEval('run',21,'ack');
+    set(handles.commands, 'String', 'Access granted!', 'BackgroundColor', 'green', 'FontSize', 24, 'FontWeight', 'bold');
+    %     serialEval('run',20,'ack');
 end
 
 

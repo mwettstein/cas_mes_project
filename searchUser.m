@@ -1,9 +1,10 @@
-function [username] = searchUser(speechSample, userStruct, distinction_limit, plotEnable)
+function [username, auth] = searchUser(speechSample, userStruct, distinction_limit, plotEnable)
 
 global nrOfMfccCoeffs;
 % distinction_limit = 1.5;
 format compact;
 format shortG;
+auth = 0;
 
 cellContent = fieldnames(userStruct);
 nrOfUsers = length(cellContent);
@@ -17,16 +18,18 @@ mfcc = mfcc(:,isfinite(mfcc(1,:))); %Renoves every column that contains a NaN et
 
 for p=1:nrOfUsers
     d=euDist(mfcc,userStruct.(cellContent{p}).characteristics);
-    distance(p)=(sum(min(d,[],2))/size(d,1));
+    distance(p)=10^(sum(min(d,[],2))/size(d,1))/1e15;
+%     distance(p)=(sum(min(d,[],2))/size(d,1));
 end
 distance
 distance_sort = sort(distance,'ascend');
-% if(((distance_sort(2)-distance_sort(1)) <= distinction_limit) || (sum(distance) <= 300) || (distance_sort(1) >= 100))
-if((distance_sort(2)-distance_sort(1)) <= distinction_limit)
+if(((distance_sort(2)-distance_sort(1)) <= distinction_limit) || (sum(distance) <= 300) || (distance_sort(1) >= 100))
+% if((distance_sort(2)-distance_sort(1)) <= distinction_limit)
     username = 'error';
 else
     [~,winner]=min(distance);
     username = userStruct.(cellContent{winner}).name;
+    auth = userStruct.(cellContent{winner}).autorisation;
     disp(['nearest match: ' userStruct.(cellContent{winner}).name]);
 end
 

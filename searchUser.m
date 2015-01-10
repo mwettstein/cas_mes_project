@@ -41,6 +41,9 @@ if(plotEnable == 1)
     grid on;
     title('Mel Coefficients');
     axis tight;
+    set(gca,'XLim', [0 1000]);
+    set(gca,'YLim', [0 600]);
+%     set(gca,'ZLim', [-50 50]);
     set(gca,'XTick', [200, 400, 600, 800, 1000]);
     set(gca,'XTickLabel', num2str([20; 40; 60; 80; 100]));
     set(gca,'YTick', [150, 300, 450, 600]);

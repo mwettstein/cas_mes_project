@@ -115,7 +115,7 @@ global allusers;
 global nrOfMfccCoeffs;
 rec = audiorecorder(fs,depth,1);
 set(handles.edit1,'string','Start speaking');
-recordblocking(rec, 3);
+recordblocking(rec, 1.5);
 set(handles.edit1,'string','End of Recording');
 recdata = getaudiodata(rec);
 fields = fieldnames(allusers);

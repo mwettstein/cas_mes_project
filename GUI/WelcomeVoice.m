@@ -117,7 +117,7 @@ if(max(abs(recdata)) <= 0.2)
 end
 
 subplot(3,2,4)
-spectrogram(recdata, 512, 64, 256, fs/1000, 'yaxis');
+spectrogram(recdata, 512, 256, 256, fs/1000, 'yaxis');
 axis tight;
 xlabel('Time [ms]');
 ylabel('Frequency [kHz]');

@@ -117,6 +117,7 @@ rec = audiorecorder(fs,depth,1);
 set(handles.edit1,'string','Start speaking');
 recordblocking(rec, 1.5);
 set(handles.edit1,'string','End of Recording');
+drawnow;
 recdata = getaudiodata(rec);
 fields = fieldnames(allusers);
 fieldsend = fields(end);
@@ -129,6 +130,8 @@ allusers. (['user' int2str(newmaxuser)]).sample = recdata;
 % allusers. (['user' int2str(newmaxuser)]).characteristics =
 % generateCodebook;          % Codebook will be generated separately
 
+set(handles.edit1,'string','Generating Codebook');
+drawnow;
 generateCodebook('kmeans');
 
 users = allusers;
